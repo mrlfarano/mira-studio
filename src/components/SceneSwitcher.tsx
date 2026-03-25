@@ -16,6 +16,17 @@ const SceneSwitcher: React.FC = () => {
   const [isOpen, setIsOpen] = useState(false);
   const [isSwitching, setIsSwitching] = useState(false);
 
+  // --- Scene switching with loading state ---
+  const handleSwitch = useCallback(async (id: string) => {
+    setIsSwitching(true);
+    try {
+      await switchScene(id);
+    } finally {
+      setIsSwitching(false);
+      setIsOpen(false);
+    }
+  }, [switchScene]);
+
   // --- Keyboard shortcuts ---
   const handleKeyDown = useCallback(
     (e: KeyboardEvent) => {
@@ -40,24 +51,13 @@ const SceneSwitcher: React.FC = () => {
         }
       }
     },
-    [scenes, swapWorkspaces],
+    [scenes, swapWorkspaces, handleSwitch],
   );
 
   useEffect(() => {
     window.addEventListener("keydown", handleKeyDown);
     return () => window.removeEventListener("keydown", handleKeyDown);
   }, [handleKeyDown]);
-
-  // --- Scene switching with loading state ---
-  const handleSwitch = async (id: string) => {
-    setIsSwitching(true);
-    try {
-      await switchScene(id);
-    } finally {
-      setIsSwitching(false);
-      setIsOpen(false);
-    }
-  };
 
   // --- Derive active scene info ---
   const currentScene = scenes.find((s) => s.id === activeScene);

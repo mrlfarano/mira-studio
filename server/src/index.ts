@@ -51,8 +51,7 @@ const gitSync = await registerGitRoutes(server, PROJECT_ROOT, configEngine);
 server.log.info(`GitSyncEngine initialised — repo: ${gitSync.initialized}`);
 
 // Register skill system routes
-const { runtime: skillRuntime, store: skillStore } =
-  await registerSkillRoutes(server, PROJECT_ROOT, configEngine);
+await registerSkillRoutes(server, PROJECT_ROOT, configEngine);
 server.log.info("SkillRuntime initialised");
 
 // Register build journal engine and REST routes
@@ -65,7 +64,7 @@ const journalEngine = await registerJournalRoutes(
 server.log.info("JournalEngine initialised");
 
 // Register companion AI engine and REST/SSE routes
-const companionEngine = await registerCompanionRoutes(
+await registerCompanionRoutes(
   server,
   PROJECT_ROOT,
   configEngine,
@@ -77,11 +76,11 @@ const mcpBridge = await registerMcpRoutes(server, PROJECT_ROOT);
 server.log.info("McpBridge initialised");
 
 // Register snapshot engine and REST routes
-const snapshotEngine = await registerSnapshotRoutes(server, configEngine);
+await registerSnapshotRoutes(server, configEngine);
 server.log.info("SnapshotEngine initialised");
 
 // Register Self-Improvement (SI) engine and REST routes
-const siEngine = await registerSIRoutes(server, PROJECT_ROOT);
+await registerSIRoutes(server, PROJECT_ROOT);
 server.log.info("SIEngine initialised");
 
 // Graceful shutdown: generate daily summary, kill PTY sessions, close server

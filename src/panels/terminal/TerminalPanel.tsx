@@ -113,7 +113,7 @@ const TerminalPanel: React.FC<TerminalPanelProps> = ({
   const fitAddonRef = useRef<FitAddon | null>(null);
   const [isReady, setIsReady] = useState(false);
 
-  const { attach, detach, notifyResize, agentStatus, connectionState: _connectionState } =
+  const { attach, detach, notifyResize, agentStatus } =
     useTerminal({ sessionId });
 
   // ── Initialize xterm ────────────────────────────────────────────────────

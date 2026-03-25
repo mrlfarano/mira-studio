@@ -12,6 +12,7 @@ import type { WebSocket } from "@fastify/websocket";
 import { PtyManager } from "../pty/pty-manager.js";
 import type {
   ClientMessage,
+  PtyStatus,
   ServerMessage,
 } from "../pty/pty-protocol.js";
 
@@ -50,9 +51,9 @@ export function registerPtyRoutes(
         if (id === sessionId) {
           send(socket, {
             type: "status",
-            status: status as any,
+            status: status as PtyStatus,
             sessionId: id,
-          } as ServerMessage);
+          });
         }
       };
 
@@ -130,13 +131,13 @@ export function registerPtyRoutes(
             default:
               send(socket, {
                 type: "error",
-                message: `Unknown message type: ${(msg as any).type}`,
+                message: `Unknown message type: ${(msg as ClientMessage).type}`,
               });
           }
-        } catch (err: any) {
+        } catch (err: unknown) {
           send(socket, {
             type: "error",
-            message: err.message ?? "Internal error",
+            message: err instanceof Error ? err.message : "Internal error",
           });
         }
       });

@@ -67,11 +67,10 @@ export class JournalEngine extends EventEmitter {
     await this.loadTodayEntries();
 
     // Listen to PTY events
-    ptyManager.on("status", (sessionId: string, status: string) => {
-      // We only care about transitions that indicate start/stop
-      // "running" after idle/new = session start signal already handled by spawn
-      // We skip noisy status transitions here
-    });
+    // Listen to PTY status events — currently a no-op as session
+    // start/stop is handled via spawn monkey-patch and exit listener.
+    // eslint-disable-next-line @typescript-eslint/no-unused-vars
+    ptyManager.on("status", (..._args: unknown[]) => { /* no-op */ });
 
     // Session spawned
     const originalSpawn = ptyManager.spawn.bind(ptyManager);

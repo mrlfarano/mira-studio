@@ -114,17 +114,15 @@ const OnboardingWizard: React.FC = () => {
     return () => clearTimeout(t);
   }, [currentStep]);
 
-  // Populate input from existing answer when navigating back
-  useEffect(() => {
-    const step = STEPS[currentStep];
-    if (!step) return;
+  const getAnswerForStep = useCallback((stepIndex: number): string => {
+    const step = STEPS[stepIndex];
+    if (!step) return "";
     if (step.key === "existingTools") {
-      setInputValue(answers.existingTools.join(", "));
-    } else {
-      const val = answers[step.key as keyof typeof answers];
-      setInputValue(typeof val === "string" ? val : "");
+      return answers.existingTools.join(", ");
     }
-  }, [currentStep, answers]);
+    const val = answers[step.key as keyof typeof answers];
+    return typeof val === "string" ? val : "";
+  }, [answers]);
 
   const saveCurrentAnswer = useCallback(() => {
     const step = STEPS[currentStep];
@@ -146,7 +144,7 @@ const OnboardingWizard: React.FC = () => {
     saveCurrentAnswer();
     if (currentStep < totalSteps - 1) {
       nextStep();
-      setInputValue("");
+      setInputValue(getAnswerForStep(currentStep + 1));
     } else {
       // Final step -- process answers and apply configuration
       const result = processOnboardingAnswers(
@@ -176,12 +174,14 @@ const OnboardingWizard: React.FC = () => {
     setTogglesForWorkspace,
     activeWorkspace,
     setPanels,
+    getAnswerForStep,
   ]);
 
   const handleBack = useCallback(() => {
     saveCurrentAnswer();
     prevStep();
-  }, [saveCurrentAnswer, prevStep]);
+    setInputValue(getAnswerForStep(currentStep - 1));
+  }, [saveCurrentAnswer, prevStep, getAnswerForStep, currentStep]);
 
   const handleKeyDown = useCallback(
     (e: React.KeyboardEvent) => {

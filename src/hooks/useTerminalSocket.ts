@@ -2,7 +2,7 @@
  * Terminal-specific WebSocket hook for PTY sessions.
  */
 
-import { useCallback, useEffect, useMemo, useRef } from "react";
+import { useCallback, useEffect, useMemo, useReducer } from "react";
 import { useWebSocket } from "@/hooks/useWebSocket";
 import type {
   PtyClientMessage,
@@ -10,6 +10,27 @@ import type {
   PtyOutputMessage,
   PtyStatusMessage,
 } from "@/types/ws-protocol";
+
+interface SocketDerivedState {
+  output: string | null;
+  status: PtyStatusMessage | null;
+}
+
+type SocketAction =
+  | { type: "output"; data: string }
+  | { type: "status"; msg: PtyStatusMessage }
+  | { type: "reset" };
+
+function socketReducer(state: SocketDerivedState, action: SocketAction): SocketDerivedState {
+  switch (action.type) {
+    case "output":
+      return { ...state, output: action.data };
+    case "status":
+      return { ...state, status: action.msg };
+    case "reset":
+      return { output: null, status: null };
+  }
+}
 
 export interface UseTerminalSocketReturn {
   /** Send raw input to the PTY. */
@@ -41,20 +62,20 @@ export function useTerminalSocket(
   const url = sessionId ? buildPtyUrl(sessionId) : null;
   const { send, lastMessage, connectionState } = useWebSocket(url);
 
-  const outputRef = useRef<string | null>(null);
-  const statusRef = useRef<PtyStatusMessage | null>(null);
+  const [derived, dispatch] = useReducer(socketReducer, { output: null, status: null });
 
   // Derive typed values from lastMessage
   const serverMsg = lastMessage as PtyServerMessage | null;
 
-  if (serverMsg) {
+  useEffect(() => {
+    if (!serverMsg) return;
     if (serverMsg.type === "output") {
-      outputRef.current = (serverMsg as PtyOutputMessage).data;
+      dispatch({ type: "output", data: (serverMsg as PtyOutputMessage).data });
     }
     if (serverMsg.type === "status") {
-      statusRef.current = serverMsg as PtyStatusMessage;
+      dispatch({ type: "status", msg: serverMsg as PtyStatusMessage });
     }
-  }
+  }, [serverMsg]);
 
   const sendInput = useCallback(
     (data: string) => {
@@ -81,10 +102,9 @@ export function useTerminalSocket(
     send<PtyClientMessage>({ type: "kill" });
   }, [send]);
 
-  // Reset refs when sessionId changes
+  // Reset state when sessionId changes
   useEffect(() => {
-    outputRef.current = null;
-    statusRef.current = null;
+    dispatch({ type: "reset" });
   }, [sessionId]);
 
   return useMemo(
@@ -93,11 +113,11 @@ export function useTerminalSocket(
       resize,
       spawn,
       kill,
-      output: outputRef.current,
-      status: statusRef.current,
+      output: derived.output,
+      status: derived.status,
       connectionState,
       lastMessage: serverMsg,
     }),
-    [sendInput, resize, spawn, kill, connectionState, serverMsg],
+    [sendInput, resize, spawn, kill, derived.output, derived.status, connectionState, serverMsg],
   );
 }

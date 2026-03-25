@@ -9,7 +9,7 @@
  * - Supports session persistence: replays buffered output on reconnect
  */
 
-import { useCallback, useEffect, useRef, useState } from "react";
+import { useCallback, useEffect, useReducer, useRef } from "react";
 import type { Terminal } from "xterm";
 import { useTerminalSocket } from "@/hooks/useTerminalSocket";
 import type { PtyStatus, PtyServerMessage } from "@/types/ws-protocol";
@@ -48,9 +48,11 @@ function appendToBuffer(sessionId: string, data: string): void {
 export function useTerminal(options: UseTerminalOptions): UseTerminalReturn {
   const { sessionId } = options;
   const termRef = useRef<Terminal | null>(null);
-  const [agentStatus, setAgentStatus] = useState<PtyStatus>("idle");
   const hasSpawnedRef = useRef(false);
   const attachedSessionRef = useRef<string | null>(null);
+
+  const statusReducer = useCallback((_: PtyStatus, action: PtyStatus) => action, []);
+  const [agentStatus, dispatchStatus] = useReducer(statusReducer, "idle" as PtyStatus);
 
   const {
     sendInput,
@@ -125,11 +127,10 @@ export function useTerminal(options: UseTerminalOptions): UseTerminalReturn {
         break;
 
       case "status":
-        setAgentStatus(msg.status);
+        dispatchStatus(msg.status);
         break;
 
       case "spawned":
-        // Shell is ready
         break;
 
       case "error":
@@ -144,7 +145,7 @@ export function useTerminal(options: UseTerminalOptions): UseTerminalReturn {
             `\r\n\x1b[90m[Process exited with code ${msg.exitCode}]\x1b[0m\r\n`,
           );
         }
-        setAgentStatus("idle");
+        dispatchStatus("idle");
         break;
     }
   }, [lastMessage, sessionId]);

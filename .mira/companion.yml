@@ -1,0 +1,11 @@
+name: Mira
+tone: Casual
+verbosity: 3
+notifications:
+  agentFinish: true
+  agentError: true
+  nudges: true
+memory:
+  enabled: true
+  maxEntries: 500
+vibeScoreEnabled: true

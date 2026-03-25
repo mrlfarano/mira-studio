@@ -6,6 +6,7 @@ import { useCommandStore } from '../store/command-store'
 import { useSceneStore } from '../store/scene-store'
 import { useThemeStore } from '../store/theme-store'
 import { useOnboardingStore } from '../store/onboarding-store'
+import { NotificationType } from '../types/notification'
 
 describe('Toggle Store', () => {
   beforeEach(() => useToggleStore.setState(useToggleStore.getInitialState()))
@@ -30,6 +31,7 @@ describe('Kanban Store', () => {
 
   it('adds a card', () => {
     useKanbanStore.getState().addCard({
+      id: 'card-1',
       title: 'Test Card',
       description: 'Test description',
       status: 'idea',
@@ -42,6 +44,7 @@ describe('Kanban Store', () => {
 
   it('moves a card between columns', () => {
     useKanbanStore.getState().addCard({
+      id: 'card-2',
       title: 'Move Me',
       description: '',
       status: 'idea',
@@ -55,6 +58,7 @@ describe('Kanban Store', () => {
 
   it('deletes a card', () => {
     useKanbanStore.getState().addCard({
+      id: 'card-3',
       title: 'Delete Me',
       description: '',
       status: 'idea',
@@ -78,20 +82,26 @@ describe('Notification Store', () => {
 
   it('adds a notification', () => {
     useNotificationStore.getState().addNotification({
-      type: 'system',
+      id: 'n-1',
+      type: NotificationType.System,
       title: 'Test',
       message: 'Hello',
       source: 'test',
+      timestamp: Date.now(),
+      read: false,
     })
     expect(useNotificationStore.getState().notifications).toHaveLength(1)
   })
 
   it('marks notification as read', () => {
     useNotificationStore.getState().addNotification({
-      type: 'system',
+      id: 'n-2',
+      type: NotificationType.System,
       title: 'Test',
       message: 'Hello',
       source: 'test',
+      timestamp: Date.now(),
+      read: false,
     })
     const id = useNotificationStore.getState().notifications[0].id
     useNotificationStore.getState().markRead(id)
@@ -100,16 +110,22 @@ describe('Notification Store', () => {
 
   it('clears all notifications', () => {
     useNotificationStore.getState().addNotification({
-      type: 'system',
+      id: 'n-3',
+      type: NotificationType.System,
       title: '1',
       message: '',
       source: 'test',
+      timestamp: Date.now(),
+      read: false,
     })
     useNotificationStore.getState().addNotification({
-      type: 'system',
+      id: 'n-4',
+      type: NotificationType.System,
       title: '2',
       message: '',
       source: 'test',
+      timestamp: Date.now(),
+      read: false,
     })
     useNotificationStore.getState().clearAll()
     expect(useNotificationStore.getState().notifications).toHaveLength(0)

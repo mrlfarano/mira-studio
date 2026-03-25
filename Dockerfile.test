@@ -1,0 +1,56 @@
+FROM node:22-bookworm
+
+# Install dependencies for node-pty and Playwright
+RUN apt-get update && apt-get install -y \
+    build-essential \
+    python3 \
+    git \
+    && npx playwright install --with-deps chromium \
+    && rm -rf /var/lib/apt/lists/*
+
+WORKDIR /app
+
+# Copy package files first for layer caching
+COPY package.json package-lock.json ./
+COPY server/package.json server/package-lock.json ./server/
+
+# Install dependencies
+RUN npm ci --legacy-peer-deps
+RUN cd server && npm ci
+
+# Copy source
+COPY . .
+
+# Create .mira directory for config engine tests
+RUN mkdir -p .mira/workspaces .mira/themes .mira/snapshots .mira/journals
+
+# Initialize git for git sync tests
+RUN git config --global user.email "test@mira.dev" && \
+    git config --global user.name "Mira Test" && \
+    git init && git add -A && git commit -m "test commit"
+
+# Run all tests and generate reports
+CMD bash -c '\
+  echo "=== Frontend Unit Tests ===" && \
+  npx vitest run --reporter=json --reporter=default --outputFile=test-results/frontend.json 2>&1; \
+  echo "=== Server Unit Tests ===" && \
+  cd server && npx vitest run --reporter=json --reporter=default --outputFile=../test-results/server.json 2>&1; \
+  cd .. && \
+  echo "=== Building Frontend ===" && \
+  npm run build 2>&1 && \
+  echo "=== Starting Servers for E2E ===" && \
+  cd server && npx tsx src/index.ts &  \
+  SERVER_PID=$! && \
+  cd /app && npx vite preview --port 5173 &  \
+  VITE_PID=$! && \
+  sleep 3 && \
+  echo "=== E2E Tests ===" && \
+  npx playwright test --reporter=html --output=test-results/e2e-results 2>&1; \
+  E2E_EXIT=$? && \
+  kill $SERVER_PID $VITE_PID 2>/dev/null; \
+  echo "=== Test Summary ===" && \
+  echo "Frontend: see test-results/frontend.json" && \
+  echo "Server: see test-results/server.json" && \
+  echo "E2E: see test-results/e2e-results/" && \
+  exit $E2E_EXIT \
+'

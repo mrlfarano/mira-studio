@@ -1,0 +1,253 @@
+{
+	"meta": {
+		"generatedAt": "2026-03-25T03:25:39.848Z",
+		"tasksAnalyzed": 30,
+		"totalTasks": 30,
+		"analysisCount": 30,
+		"thresholdScore": 5,
+		"projectName": "Mira Studio",
+		"usedResearch": true
+	},
+	"complexityAnalysis": [
+		{
+			"taskId": 1,
+			"taskTitle": "Initialize Project Scaffolding with Vite + React + TypeScript",
+			"complexityScore": 3,
+			"recommendedSubtasks": 4,
+			"expansionPrompt": "Break down the Vite + React + TypeScript scaffolding into: 1) Initial Vite project creation with React-TS template, 2) TypeScript configuration with strict mode and path aliases, 3) ESLint and Prettier setup with specified rules, 4) Folder structure creation and core dependency installation. Each subtask should be independently verifiable.",
+			"reasoning": "This is a well-documented greenfield setup task using standard tooling (Vite, React, TypeScript). The steps are clear and follow established patterns. Complexity is moderate due to the need for proper path alias configuration and linting setup, but no existing code conflicts exist. Most steps are boilerplate with some customization."
+		},
+		{
+			"taskId": 2,
+			"taskTitle": "Set Up Node.js Local Server with Express/Fastify",
+			"complexityScore": 4,
+			"recommendedSubtasks": 5,
+			"expansionPrompt": "Break down the server setup into: 1) Server directory initialization with package.json and TypeScript config for ESM, 2) Fastify instance with CORS and health endpoint, 3) WebSocket upgrade handling setup, 4) Modular directory structure for pty/config/ws/mcp, 5) Development and build scripts with tsx. Include security binding to 127.0.0.1.",
+			"reasoning": "Moderate complexity due to the two-process architecture requirement. Requires setting up Fastify with WebSocket support, TypeScript ESM configuration, and a modular structure for future expansion. The localhost-only binding is a security requirement. No existing code to integrate with, but needs to be designed for future PTY and MCP integration."
+		},
+		{
+			"taskId": 3,
+			"taskTitle": "Implement Config Engine for .mira/ Directory",
+			"complexityScore": 6,
+			"recommendedSubtasks": 6,
+			"expansionPrompt": "Break down the Config Engine into: 1) TypeScript interfaces for all config schemas (MiraConfig, CompanionConfig, WorkspaceConfig, SkillsConfig), 2) ConfigEngine class with loadConfig and saveConfig methods using js-yaml, 3) File watcher implementation with chokidar for external changes, 4) Debounced auto-save mechanism (300ms), 5) Directory structure initialization for .mira/ scaffold, 6) REST endpoints for config CRUD with two-layer model (portable vs personal). Target <100ms write time.",
+			"reasoning": "Higher complexity due to the two-layer config model, file watching requirements, performance targets (<100ms writes), and schema validation needs. This is a critical foundation component that many other features depend on. Requires careful design for the portable vs personal layer separation and gitignore handling."
+		},
+		{
+			"taskId": 4,
+			"taskTitle": "Build Panel Layout Engine with Drag-and-Drop",
+			"complexityScore": 7,
+			"recommendedSubtasks": 7,
+			"expansionPrompt": "Break down the Panel Layout Engine into: 1) react-grid-layout integration with responsive breakpoints, 2) Generic Panel wrapper component with header, drag handle, and content slot, 3) Zustand layoutStore with panel CRUD operations, 4) Layout serialization to/from .mira/workspaces/*.yml via config engine, 5) PanelConfig TypeScript interface with position, size, type, and props, 6) Performance optimization for <16ms frame time during drag, 7) Panel z-index management for overlapping. Include minimum size enforcement (240x180px).",
+			"reasoning": "High complexity due to performance requirements (<16ms frame time), integration with config persistence, and the need for a flexible panel system that supports multiple panel types. This is a core UI infrastructure component. Requires careful attention to React performance optimization and serialization strategies."
+		},
+		{
+			"taskId": 5,
+			"taskTitle": "Implement PTY Manager with node-pty",
+			"complexityScore": 6,
+			"recommendedSubtasks": 6,
+			"expansionPrompt": "Break down the PTY Manager into: 1) PtyManager class with session spawn, write, resize, and kill methods, 2) Session tracking with Map<string, PtySession> including status and output buffer, 3) Output buffer management (retain last 5000 lines per session), 4) Status detection heuristics (idle, thinking, running, error), 5) Graceful shutdown handling (SIGTERM → SIGKILL after 5s), 6) WebSocket message protocol for PTY I/O. Target 8+ concurrent terminals.",
+			"reasoning": "Moderate-high complexity due to native module integration (node-pty), session management requirements, status detection heuristics, and scalability target of 8+ concurrent terminals. Requires careful resource management and output buffering for reconnection scenarios."
+		},
+		{
+			"taskId": 6,
+			"taskTitle": "Create WebSocket Communication Layer",
+			"complexityScore": 5,
+			"recommendedSubtasks": 5,
+			"expansionPrompt": "Break down the WebSocket layer into: 1) Shared message protocol type definitions (pty:output, pty:input, config:update, etc.), 2) Server-side WsHandler with connection management and heartbeat (30s ping/pong), 3) Client-side WsClient singleton with auto-reconnect and exponential backoff, 4) React hook useWebSocket for typed message subscription and sending, 5) Binary support for terminal data and latency measurement (<50ms target). Include message queue during disconnect.",
+			"reasoning": "Moderate complexity with clear requirements. Requires implementing a typed message protocol, auto-reconnect logic, and performance monitoring. The multiplexing requirement (single WS for all terminals) adds some complexity. The <50ms latency target needs measurement infrastructure."
+		},
+		{
+			"taskId": 7,
+			"taskTitle": "Build Terminal Panel with xterm.js",
+			"complexityScore": 7,
+			"recommendedSubtasks": 7,
+			"expansionPrompt": "Break down the Terminal Panel into: 1) xterm.js initialization with WebGL renderer and canvas fallback, 2) Addon integration (fit, webgl, web-links) with ResizeObserver, 3) useTerminal hook connecting to PTY via WebSocket, 4) Agent status indicator UI (idle, thinking, running, error badges), 5) Session persistence with reconnection to existing sessions, 6) Terminal toolbar (clear, copy, status badge), 7) Keyboard handling and performance testing for 8 concurrent terminals at 60fps.",
+			"reasoning": "High complexity due to WebGL rendering, multiple addon integrations, session persistence requirements, and the 8-terminal 60fps performance target. The agent status indicator requires parsing agent-specific output patterns. Integration with PTY Manager via WebSocket adds coupling complexity."
+		},
+		{
+			"taskId": 8,
+			"taskTitle": "Implement Toggle System and Workspace Profiles",
+			"complexityScore": 5,
+			"recommendedSubtasks": 5,
+			"expansionPrompt": "Break down the Toggle System into: 1) Zustand toggleStore with module visibility state and active profile, 2) Module registry defining all modules with metadata (id, name, cornerstone, dependencies), 3) Preset profiles (Minimal, Balanced, Full Send) with default visibility mappings, 4) ProfileSwitcher component with custom profile save/load, 5) Config persistence to .mira/workspaces/[name].yml with <500ms profile switch target. Sync with layoutStore for hidden panels.",
+			"reasoning": "Moderate complexity with clear requirements. The main challenges are coordinating toggle state with the layout system and meeting the <500ms profile switch requirement. Requires careful state management to ensure hidden modules don't render."
+		},
+		{
+			"taskId": 9,
+			"taskTitle": "Build Zustand State Management with Config Sync",
+			"complexityScore": 6,
+			"recommendedSubtasks": 6,
+			"expansionPrompt": "Break down the Zustand state management into: 1) Core store definitions (layoutStore, toggleStore, sessionStore, companionStore, configStore), 2) configSync middleware with debounced persistence (300ms) to server, 3) Optimistic update pattern with conflict resolution (server wins + notification), 4) Store hydration from config on app load with createConfigStorage adapter, 5) Type-safe selectors with useShallow for performance, 6) Devtools integration for debugging. Handle server round-trip for persistence.",
+			"reasoning": "Moderate-high complexity due to the bidirectional sync between Zustand and .mira/ config files. Requires implementing optimistic updates, conflict resolution, and a custom storage adapter. The multiple interconnected stores add complexity. This is foundational for many other features."
+		},
+		{
+			"taskId": 10,
+			"taskTitle": "Create Quick-Prompt Bar Component",
+			"complexityScore": 4,
+			"recommendedSubtasks": 4,
+			"expansionPrompt": "Break down the Quick-Prompt Bar into: 1) QuickPromptBar floating component with keyboard shortcut trigger (Cmd+K), 2) quickPromptStore with open state, active terminal, and recent prompts, 3) Input features (Enter to send, history with Up/Down, fuzzy auto-complete), 4) Focus management (track previous focus, restore after send, accessibility). Include visual feedback and error handling for no active terminal.",
+			"reasoning": "Moderate complexity with clear UX requirements. The main challenges are focus management (not interrupting terminal typing) and keyboard shortcut integration. Requires integration with the terminal system for prompt injection."
+		},
+		{
+			"taskId": 11,
+			"taskTitle": "Implement Mira Companion Panel UI",
+			"complexityScore": 5,
+			"recommendedSubtasks": 5,
+			"expansionPrompt": "Break down the Companion Panel UI into: 1) CompanionPanel component with chat message list using react-virtual for scrolling, 2) Message types and companionStore (messages, isCollapsed, isTyping), 3) Streaming support with SSE or WebSocket for partial responses and live markdown rendering, 4) MessageBubble component with markdown, syntax highlighting, and copy button, 5) Companion personality indicator and collapse-to-avatar mode. Persist to .mira/memory.yml.",
+			"reasoning": "Moderate complexity with streaming UI requirements. Virtual scrolling for chat history, markdown rendering with syntax highlighting, and streaming response support add complexity. The collapse functionality and personality configuration need careful UI design."
+		},
+		{
+			"taskId": 12,
+			"taskTitle": "Build Companion AI Engine with Provider Adapters",
+			"complexityScore": 7,
+			"recommendedSubtasks": 7,
+			"expansionPrompt": "Break down the Companion AI Engine into: 1) CompanionEngine class with chat method and context assembly, 2) LLMAdapter interface definition for provider-agnostic design, 3) ClaudeAdapter implementation with @anthropic-ai/sdk, 4) OpenAIAdapter and OllamaAdapter implementations, 5) System prompt construction from companion.yml with workspace context, 6) Action parsing for detecting config change suggestions, 7) REST endpoint with SSE streaming and rate limiting. Include error handling and graceful fallbacks.",
+			"reasoning": "High complexity due to multi-provider support, context assembly from multiple sources, streaming response handling, and action parsing for side effects. The adapter pattern requires careful interface design. Error handling and graceful degradation are critical for UX."
+		},
+		{
+			"taskId": 13,
+			"taskTitle": "Implement Onboarding Wizard Flow",
+			"complexityScore": 6,
+			"recommendedSubtasks": 6,
+			"expansionPrompt": "Break down the Onboarding Wizard into: 1) OnboardingWizard full-screen overlay with conversational UI and progress indicator, 2) Question flow implementation (project type, work style, tools, free-form), 3) Server-side onboarding processor with structured prompts for Companion AI, 4) Config generation from wizard answers (workspace layout, module selection, skill suggestions), 5) Skip option with blank slate fallback, 6) Timer implementation and completion flag persistence. Target <60 seconds completion.",
+			"reasoning": "Moderate-high complexity due to AI integration for answer interpretation, config generation from natural language, and the <60 second UX target. Requires coordination between Companion AI and Config Engine. The conversational UI (not form-based) adds design complexity."
+		},
+		{
+			"taskId": 14,
+			"taskTitle": "Build Kanban Board Panel",
+			"complexityScore": 6,
+			"recommendedSubtasks": 6,
+			"expansionPrompt": "Break down the Kanban Board into: 1) KanbanPanel with columns and @hello-pangea/dnd integration, 2) KanbanCard model and TypeScript interfaces (id, title, description, context, status), 3) kanbanStore with card CRUD and column operations, 4) Virtualized rendering for 500+ cards performance, 5) KanbanCard component with context indicators and quick actions menu, 6) Card editor modal with rich text and file/URL attachments. Persist to .mira/kanban.yml.",
+			"reasoning": "Moderate-high complexity due to drag-and-drop requirements, virtualization for 500+ cards, and the context bundle model for agent integration. The card editor with attachments adds UI complexity. Requires integration with config persistence."
+		},
+		{
+			"taskId": 15,
+			"taskTitle": "Implement Send-to-Agent Functionality",
+			"complexityScore": 5,
+			"recommendedSubtasks": 5,
+			"expansionPrompt": "Break down Send-to-Agent into: 1) agentContext utility for building context prompts from KanbanCard, 2) Send-to-Agent action in card menu with keyboard shortcut (Cmd+Enter), 3) Target terminal selection logic (single vs multiple active), 4) Prompt injection via WebSocket to PTY with card status update, 5) Visual feedback (badge, terminal indicator) and error handling. Store card.agentTarget reference.",
+			"reasoning": "Moderate complexity with clear requirements. Main challenges are the context prompt formatting that agents understand, terminal selection UX, and real-time status updates. Requires integration between Kanban and Terminal systems."
+		},
+		{
+			"taskId": 16,
+			"taskTitle": "Create Smart Notifications System",
+			"complexityScore": 4,
+			"recommendedSubtasks": 4,
+			"expansionPrompt": "Break down the Notifications System into: 1) NotificationCenter component with toast stack and history panel, 2) Notification model and notificationStore with CRUD and read state, 3) Non-intrusive notification behaviors (focus detection, auto-dismiss, slide-in), 4) Agent event triggers from PTY status changes. Include Do Not Disturb mode and Mira-style notification customization.",
+			"reasoning": "Moderate complexity with clear UX requirements. The non-interruption requirement (detecting active typing) adds some complexity. Integration with PTY status changes is straightforward given the existing status system. Standard notification patterns apply."
+		},
+		{
+			"taskId": 17,
+			"taskTitle": "Implement MCP Connection Wizard",
+			"complexityScore": 7,
+			"recommendedSubtasks": 7,
+			"expansionPrompt": "Break down the MCP Connection Wizard into: 1) McpBridge class using @modelcontextprotocol/sdk with connect, listTools, disconnect methods, 2) McpStatusPanel with connection cards showing status, tools, reconnect, 3) Conversational connection flow via Companion AI integration, 4) Auto-discovery scanner for project files (docker-compose, .env, package.json), 5) System keychain integration for credential storage (keytar), 6) MCP status WebSocket updates, 7) REST endpoints for MCP operations. No JSON editing requirement.",
+			"reasoning": "High complexity due to MCP SDK integration, auto-discovery of services, system keychain for credentials, and the conversational flow requirement. The 'no JSON editing' principle requires careful UX design. Multiple service types need detection patterns."
+		},
+		{
+			"taskId": 18,
+			"taskTitle": "Build Skill System Runtime",
+			"complexityScore": 8,
+			"recommendedSubtasks": 8,
+			"expansionPrompt": "Break down the Skill System Runtime into: 1) SkillManifest TypeScript interface with all declared fields (cornerstones, panels, permissions, etc.), 2) SkillRuntime class with load, install, uninstall, and hot-reload methods, 3) Web Worker sandboxing for skill execution, 4) Permission enforcement middleware with runtime checks, 5) Skill API surface exposed to skills (mira.panels.register, mira.kanban.addCard, etc.), 6) skillStore for installed/enabled skills per workspace, 7) Hot-reload file watching for development, 8) Persistence to .mira/skills.yml. Include namespace isolation for composable skills.",
+			"reasoning": "High complexity due to sandboxing requirements (Web Workers), permission enforcement, hot-reload without restart, and the composable skill architecture. The manifest validation and runtime enforcement need careful design. This is a core extensibility mechanism."
+		},
+		{
+			"taskId": 19,
+			"taskTitle": "Implement Build Journal Auto-Generation",
+			"complexityScore": 5,
+			"recommendedSubtasks": 5,
+			"expansionPrompt": "Break down Build Journal into: 1) JournalEngine class with logEntry and getJournal methods, 2) JournalEntry types (agent-run, card-move, file-change, config-change, session events), 3) Event listeners for PTY, Kanban, and Config Engine changes, 4) Markdown file generation in .mira/journals/YYYY-MM-DD.md format, 5) JournalPanel UI with timeline view, filtering, and search. Include end-of-session summary via Companion AI and 30-day retention.",
+			"reasoning": "Moderate complexity with clear requirements. Main challenges are listening to multiple event sources and aggregating them coherently. The markdown generation and timeline UI are straightforward. AI-generated summaries add optional complexity."
+		},
+		{
+			"taskId": 20,
+			"taskTitle": "Create Git Sync Engine for .mira/ Config",
+			"complexityScore": 6,
+			"recommendedSubtasks": 6,
+			"expansionPrompt": "Break down Git Sync Engine into: 1) GitSync class using simple-git with init, autoCommit, push, pull methods, 2) Debounced auto-commit (5s after last change) with auto-generated messages, 3) Remote configuration in .mira/config.yml with multi-remote support, 4) Conflict resolution with YAML-aware merge and visual UI, 5) Offline support with commit queue and reconnect sync, 6) REST endpoints for manual git operations and secret detection warnings. Ensure memory.yml is gitignored.",
+			"reasoning": "Moderate-high complexity due to conflict resolution requirements, offline support with queue, and YAML-aware merging. The auto-commit debouncing and secret detection add safety considerations. Integration with existing config engine is required."
+		},
+		{
+			"taskId": 21,
+			"taskTitle": "Implement Workspace Scenes (Paired Workspaces)",
+			"complexityScore": 6,
+			"recommendedSubtasks": 6,
+			"expansionPrompt": "Break down Workspace Scenes into: 1) WorkspaceScene model with paired workspace configs and shared context, 2) sceneStore with scenes, active scene, and switch operations, 3) Hot-swap via keyboard shortcut (Cmd+Tab) with <200ms transition, 4) Shared context (project, agent sessions, Kanban) vs independent (layout, modules, theme), 5) SceneSwitcher UI with visual indicator and scene name editing, 6) Persistence to .mira/workspaces/scenes.yml. Include default scene pairs.",
+			"reasoning": "Moderate-high complexity due to the shared vs independent state separation and the <200ms hot-swap requirement. Terminal preservation across scene switches adds complexity. Requires careful state management coordination."
+		},
+		{
+			"taskId": 22,
+			"taskTitle": "Build Command Palette with Rebindable Hotkeys",
+			"complexityScore": 5,
+			"recommendedSubtasks": 5,
+			"expansionPrompt": "Break down Command Palette into: 1) Action registry with typed action definitions (id, name, shortcut, execute, category), 2) Register all Mira actions (panel, agent, config, navigation operations), 3) CommandPalette component with fuzzy search and recent actions, 4) useKeyboardShortcuts hook with global listener and context awareness, 5) Shortcut rebinding with conflict detection and persistence to .mira/keybindings.yml. Include vim-style command input.",
+			"reasoning": "Moderate complexity with established patterns (command palette is common). The main challenges are comprehensive action registration, context-aware shortcuts (terminal vs UI), and vim-style input. Conflict detection for rebinding adds some complexity."
+		},
+		{
+			"taskId": 23,
+			"taskTitle": "Implement Theme Marketplace and CSS Editor",
+			"complexityScore": 5,
+			"recommendedSubtasks": 5,
+			"expansionPrompt": "Break down Theme System into: 1) Theme model and CSS variable system (--mira-* custom properties), 2) ThemeMarketplace panel with grid view, one-click install, and live preview, 3) Theme sources (built-in, GitHub registry, URL install), 4) CssEditor panel with Monaco, live preview, and variable autocomplete, 5) Theme persistence to .mira/themes/ with runtime CSS variable injection. No page reload for theme changes.",
+			"reasoning": "Moderate complexity with clear requirements. Monaco integration for CSS editing adds some complexity. Live preview without reload requires careful CSS variable injection. Marketplace browsing is straightforward with a JSON registry."
+		},
+		{
+			"taskId": 24,
+			"taskTitle": "Create Snapshot System for Workspace State",
+			"complexityScore": 5,
+			"recommendedSubtasks": 5,
+			"expansionPrompt": "Break down Snapshot System into: 1) WorkspaceSnapshot model capturing layout, toggles, kanban, and agent sessions, 2) SnapshotManager class with create, restore, list, delete methods, 3) Snapshot storage in .mira/snapshots/[id].yml with excluded data (terminal buffers), 4) Agent session handling on restore (recreate panels, not process state), 5) SnapshotManager UI with list, restore confirmation, and auto-snapshot option. Include REST endpoints.",
+			"reasoning": "Moderate complexity with clear requirements. The main challenge is deciding what state to capture vs exclude (terminal buffers too large). Agent session restoration is partial (recreate panels but can't restore process). Standard CRUD operations apply."
+		},
+		{
+			"taskId": 25,
+			"taskTitle": "Implement Auto-Card Generation from Text",
+			"complexityScore": 5,
+			"recommendedSubtasks": 5,
+			"expansionPrompt": "Break down Auto-Card Generation into: 1) BrainDumpInput component with large text area and file drag-drop, 2) Server-side cardGeneration processor with structured LLM prompts, 3) Card parsing logic (lists, paragraphs, dependency detection), 4) Preview modal for generated cards with edit/delete before commit, 5) Batch processing for large text with progress indicator. Extract code snippets and URLs to card context.",
+			"reasoning": "Moderate complexity due to AI integration for text parsing. The preview-before-commit workflow is important for user trust. Handling various text formats (lists, paragraphs) requires robust parsing. Large text batch processing needs progress feedback."
+		},
+		{
+			"taskId": 26,
+			"taskTitle": "Set Up Testing Infrastructure with Vitest and Playwright",
+			"complexityScore": 4,
+			"recommendedSubtasks": 4,
+			"expansionPrompt": "Break down Testing Infrastructure into: 1) Vitest configuration with React plugin and coverage (c8), 2) Playwright configuration for Chromium/Firefox with screenshot on failure, 3) Test utilities (renderWithProviders, mock WebSocket, mock LLM), 4) CI pipeline (GitHub Actions) with test matrix and coverage gating. Include performance assertions for timing targets.",
+			"reasoning": "Moderate complexity with established patterns. Vitest and Playwright are standard tools with good documentation. The main challenges are mocking PTY and LLM adapters for testing. CI pipeline setup is straightforward with GitHub Actions."
+		},
+		{
+			"taskId": 27,
+			"taskTitle": "Create SI Panel and project_SI.yml Structure",
+			"complexityScore": 5,
+			"recommendedSubtasks": 5,
+			"expansionPrompt": "Break down SI Panel into: 1) ProjectSI data model (cadence, hypotheses, completedCycles, lessons), 2) SIPanel component with three-column layout (What We Built, What We Learned, What's Next), 3) Real-time sync with .mira/project_SI.yml via config engine, 4) Column UIs (completed cycles with outcomes, lessons with attribution, ranked hypotheses), 5) SI Health Score indicator (activity, acceptance rate, freshness). Note: Autonomous agent deferred to v1.x.",
+			"reasoning": "Moderate complexity with clear UI requirements. The three-column layout is straightforward. Real-time sync with config engine follows existing patterns. The autonomous agent is deferred, so this is primarily a UI/data model task. Health score calculation is simple metrics."
+		},
+		{
+			"taskId": 28,
+			"taskTitle": "Implement Agent Status Detection Heuristics",
+			"complexityScore": 6,
+			"recommendedSubtasks": 5,
+			"expansionPrompt": "Break down Agent Status Detection into: 1) statusDetector module parsing terminal output stream, 2) Claude Code-specific patterns (spinner, 'Thinking...', prompt detection), 3) Codex and generic fallback patterns (timeout-based idle detection), 4) Configurable patterns stored in .mira/agents/[type].yml, 5) Status change events broadcast via WebSocket with <1s latency. Include custom pattern configuration.",
+			"reasoning": "Moderate-high complexity due to pattern matching on streaming terminal output. Different agents (Claude Code, Codex) have different output patterns. The <1s status update latency requires efficient parsing. User-configurable patterns add flexibility but complexity."
+		},
+		{
+			"taskId": 29,
+			"taskTitle": "Build Multi-Terminal Session Management",
+			"complexityScore": 6,
+			"recommendedSubtasks": 6,
+			"expansionPrompt": "Break down Multi-Terminal Management into: 1) Extend PtyManager for session pooling with limits (max 16) and memory monitoring, 2) terminalStore with session map, active session, and CRUD operations, 3) Terminal grouping by project, agent type, or custom tag, 4) Session persistence to .mira/sessions.yml with reconnection support, 5) Resource optimization (virtualize off-screen, lazy-load addons), 6) Terminal list sidebar with thumbnail, status, and quick switch. Target 8 terminals at 60fps.",
+			"reasoning": "Moderate-high complexity due to scalability requirements (8 terminals at 60fps), resource management, and session persistence. Terminal grouping adds organizational complexity. Memory monitoring for warning at 80% requires system integration."
+		},
+		{
+			"taskId": 30,
+			"taskTitle": "Create App Shell and Navigation Structure",
+			"complexityScore": 5,
+			"recommendedSubtasks": 5,
+			"expansionPrompt": "Break down App Shell into: 1) App.tsx root with theme provider, WebSocket manager, and global shortcut listener, 2) Sidebar component with collapsible sections (Workspaces, Terminals, Skills, Settings), 3) Header with workspace indicator, scene switcher, and profile switcher, 4) MainContent housing PanelGrid with loading skeletons, 5) Error boundaries for panel crash recovery. Include responsive handling (min 1024x768).",
+			"reasoning": "Moderate complexity with clear requirements. This is the main application chrome that houses all other components. Error boundaries for panel isolation are important. The sidebar and header are standard patterns. WebSocket connection management needs to be centralized here."
+		}
+	]
+}

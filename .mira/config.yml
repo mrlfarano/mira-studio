@@ -1,0 +1,12 @@
+version: 0.1.0
+projectName: My Mira Project
+activeProfile: Balanced
+activeWorkspace: default
+enabledModules:
+  - agent-cockpit
+  - companion
+  - kanban
+  - notifications
+mcpConnections: []
+telemetryOptIn: false
+activeTheme: default

@@ -1,106 +1,131 @@
-# Mira Studio
+<p align="center">
+  <strong>Mira Studio</strong>
+</p>
 
-**"Your workflow. Your rules. Your Mira."**
+<p align="center">
+  A local-first vibe coding cockpit for solo developers.<br/>
+  Your workflow. Your rules. Your Mira.
+</p>
 
-A local-first vibe coding cockpit for solo developers and indie hackers. Mira Studio unifies AI agent terminals, planning tools, and developer workflow into a single radically customizable environment. All configuration lives in Git. At the center is Mira -- a persistent AI companion who configures the environment conversationally, monitors agents, and surfaces insight without interrupting flow.
+<p align="center">
+  <a href="https://github.com/mrlfarano/mira-studio/actions/workflows/ci.yml"><img src="https://github.com/mrlfarano/mira-studio/actions/workflows/ci.yml/badge.svg" alt="CI"></a>
+  <img src="https://img.shields.io/badge/version-0.1.0-blue" alt="Version">
+  <img src="https://img.shields.io/badge/license-MIT-green" alt="License">
+  <img src="https://img.shields.io/badge/node-%3E%3D22-brightgreen" alt="Node 22+">
+</p>
 
-## Status
+---
 
-**Pre-release** | v0.0.1 | [PRD](PRD.md)
+Mira Studio unifies AI agent terminals, planning tools (Kanban, build journal), and developer workflow into a single radically customizable environment. All configuration lives in `.mira/` and is Git-backed. At the center is **Mira** — a persistent AI companion who configures the environment conversationally, monitors agents, and surfaces insight without interrupting flow.
 
-## Tech Stack
+Mira is not an IDE. It's a cockpit layer on top of your existing tools.
 
-| Layer | Technology |
-|-------|-----------|
-| Frontend | React + TypeScript, Vite |
-| UI Layout | react-grid-layout / allotment |
-| Terminal | xterm.js (WebGL) |
-| State | Zustand |
-| Server | Node.js (Express/Fastify) |
-| PTY | node-pty |
-| WebSocket | ws + native |
-| MCP | @modelcontextprotocol/sdk |
-| Config | YAML (js-yaml) |
-| Git Ops | isomorphic-git / simple-git |
-| Testing | Vitest + Playwright |
+## Getting Started
+
+### Prerequisites
+
+- **Node.js 22+**
+- **npm 10+**
+- A supported AI provider key (Anthropic, OpenAI, Ollama, etc.) — see `.env.example`
+
+### Install
+
+```bash
+# Frontend
+npm install --legacy-peer-deps
+
+# Server (includes native dep: node-pty)
+npm --prefix server install
+```
+
+### Run
+
+Start both processes — the frontend and the local server:
+
+```bash
+# Terminal 1: Fastify server (http://127.0.0.1:3001)
+npm run server
+
+# Terminal 2: Vite dev server (http://localhost:5173)
+npm run dev
+```
+
+On first launch, Mira walks you through an onboarding wizard (<60 seconds) to configure your profile and workspace.
+
+### Environment Variables
+
+Copy `.env.example` to `.env` and add your provider keys. At minimum, `ANTHROPIC_API_KEY` is required for the Mira companion.
 
 ## Architecture
 
-Two-process model: a **React browser UI** communicating via WebSocket + REST with a **Node.js local server** managing PTY sessions, MCP connections, config persistence, and the Mira companion AI engine.
+Two-process model: a **React browser UI** communicating via WebSocket + REST with a **Node.js local server**.
 
 ```
-Browser (React UI)                    Mira Local Server (Node.js)
-  Panel Layout Engine                   PTY Manager (node-pty)
-  xterm.js Terminals                    MCP Bridge
-  Kanban Board                          Config Engine (.mira/)
-  Mira Companion Panel                  Git Sync Engine
-  Command Palette                       Skill Runtime
-       |                                Companion AI Engine
-       +--- WebSocket + REST ---+       SI Agent Runtime
+Browser (:5173)                       Fastify Server (:3001)
+┌──────────────────────┐              ┌───────────────────────┐
+│ Panel Layout Engine   │◄── REST ──► │ Config Engine (.mira/) │
+│ xterm.js Terminals    │◄── WS ───► │ PTY Manager (node-pty)  │
+│ Companion Panel       │◄── SSE ──► │ Companion AI Engine     │
+│ Kanban Board          │              │ MCP Bridge              │
+│ Command Palette       │              │ Git Sync · Skills       │
+│ Zustand State         │              │ Journal · Snapshot · SI │
+└──────────────────────┘              └───────────────────────┘
 ```
 
-## The Five Cornerstones
+| Layer | Technology |
+|-------|-----------|
+| Frontend | React 19, TypeScript 5.9, Vite 8 |
+| Layout | react-grid-layout |
+| Terminal | xterm.js (WebGL) |
+| State | Zustand (auto-synced to server) |
+| Server | Fastify, node-pty, simple-git |
+| AI | Anthropic SDK, Ollama adapter |
+| MCP | @modelcontextprotocol/sdk |
+| Config | YAML (js-yaml) → `.mira/` |
+| Testing | Vitest, Playwright |
 
-1. **Creativity & Ideation** -- Spark Canvas, PRD conversation, brainstorming
-2. **Project & Delivery Planning** -- Kanban, epics/stories, methodology skills
-3. **Vibe-Code Building** -- Agent Cockpit (anchor module), Quick-Prompt, Broadcast
-4. **Observability & Reiteration** -- Build Journal, log streaming, Vibe Score
-5. **Self-Improvement** -- Autonomous build agent, SI Panel, user growth tracking
+## Features
 
-## Task Progress
+### Core
 
-| ID | Task | Priority | Status | Deps | Subtasks |
-|----|------|----------|--------|------|----------|
-| 1 | Initialize Project Scaffolding (Vite + React + TS) | high | pending | None | 4 |
-| 2 | Set Up Node.js Local Server (Express/Fastify) | high | pending | 1 | 5 |
-| 3 | Implement Config Engine (.mira/) | high | pending | 2 | 6 |
-| 4 | Build Panel Layout Engine (Drag-and-Drop) | high | pending | 1, 3 | 7 |
-| 5 | Implement PTY Manager (node-pty) | high | pending | 2 | 6 |
-| 6 | Create WebSocket Communication Layer | high | pending | 2, 5 | 5 |
-| 7 | Build Terminal Panel (xterm.js) | high | pending | 4, 5, 6 | 7 |
-| 8 | Implement Toggle System & Workspace Profiles | high | pending | 3, 4 | 5 |
-| 9 | Build Zustand State Management (Config Sync) | high | pending | 1, 3 | 6 |
-| 10 | Create Quick-Prompt Bar | high | pending | 7, 9 | 4 |
-| 11 | Implement Mira Companion Panel UI | high | pending | 4, 9 | 5 |
-| 12 | Build Companion AI Engine (Provider Adapters) | high | pending | 2, 11 | 7 |
-| 13 | Implement Onboarding Wizard | high | pending | 8, 11, 12 | 6 |
-| 14 | Build Kanban Board Panel | medium | pending | 4, 9 | 6 |
-| 15 | Implement Send-to-Agent | medium | pending | 7, 14 | 5 |
-| 16 | Create Smart Notifications | medium | pending | 5, 9 | 4 |
-| 17 | Implement MCP Connection Wizard | medium | pending | 12, 16 | 7 |
-| 18 | Build Skill System Runtime | medium | pending | 3, 9 | 8 |
-| 19 | Implement Build Journal Auto-Generation | medium | pending | 5, 14, 3 | 5 |
-| 20 | Create Git Sync Engine (.mira/) | medium | pending | 3 | 6 |
-| 21 | Implement Workspace Scenes | medium | pending | 4, 8, 9 | 6 |
-| 22 | Build Command Palette (Rebindable Hotkeys) | medium | pending | 9 | 5 |
-| 23 | Implement Theme Marketplace & CSS Editor | low | pending | 3, 9 | 5 |
-| 24 | Create Snapshot System | low | pending | 3, 9, 14 | 5 |
-| 25 | Implement Auto-Card Generation | low | pending | 12, 14 | 5 |
-| 26 | Set Up Testing Infrastructure (Vitest + Playwright) | high | pending | 1, 2 | 4 |
-| 27 | Create SI Panel & project_SI.yml | low | pending | 3, 19 | 5 |
-| 28 | Implement Agent Status Detection | medium | pending | 5, 7 | 5 |
-| 29 | Build Multi-Terminal Session Management | high | pending | 5, 7, 4 | 6 |
-| 30 | Create App Shell & Navigation | high | pending | 1, 4 | 5 |
+- **Agent Cockpit** — Embedded PTY terminals running Claude Code, Codex, or any CLI agent. Multi-session with status detection.
+- **Mira Companion** — Persistent AI chat panel. Configures your environment conversationally, generates kanban cards from brain dumps, and streams responses via SSE.
+- **Kanban Board** — Four-column board (Idea → Specced → In Agent → Done) with native drag-and-drop and Send-to-Agent context bundling.
+- **Config Engine** — All state persisted to `.mira/*.yml`, Git-backed with debounced auto-commits. Two-layer model: portable (committed) and personal (gitignored).
 
-**Total:** 30 tasks, 165 subtasks | **Next:** Task #1 (only unblocked task)
+### Workspace
 
-## Development
+- **Panel Layout** — Drag-and-drop panels with z-index management and min-size enforcement.
+- **Workspace Scenes** — Paired workspace configurations with Ctrl+Tab swap.
+- **Toggle Profiles** — Minimal / Balanced / Full Send — control which modules are active per workspace.
+- **Snapshots** — Capture and restore full workspace state.
+- **Command Palette** — Cmd+K, fuzzy search, rebindable hotkeys.
+- **Quick-Prompt Bar** — Cmd+Enter to fire a prompt at any active agent session.
 
-Task management powered by [TaskMaster AI](https://github.com/eyaltoledano/claude-task-master) with Claude Code as the AI backend.
+### Extensibility
 
-```bash
-# View tasks
-task-master list
+- **Skill System** — Install, uninstall, and hot-reload skills via manifests. Permission-gated access to Mira primitives.
+- **MCP Connections** — Auto-discovery scanner, conversational setup (no JSON editing), credentials in system keychain.
+- **Theme Marketplace** — Built-in themes + CSS editor with live preview.
+- **Build Journal** — Auto-generated session logs and daily summaries.
 
-# See next task
-task-master next
+## Scripts
 
-# View task details
-task-master show <id>
+| Command | Description |
+|---------|-------------|
+| `npm run dev` | Start Vite dev server |
+| `npm run server` | Start Fastify dev server (tsx watch) |
+| `npm run build` | TypeScript check + Vite production build |
+| `npm run lint` | ESLint |
+| `npm run format` | Prettier |
+| `npm run test` | Frontend unit tests (Vitest) |
+| `npm run test:server` | Server unit tests (Vitest) |
+| `npm run test:e2e` | End-to-end tests (Playwright) |
+| `npm run test:coverage` | Coverage report (v8) |
 
-# Mark task complete
-task-master set-status --id=<id> --status=done
-```
+## Contributing
+
+See [CONTRIBUTING.md](CONTRIBUTING.md) for coding standards, commit conventions, and PR workflow.
 
 ## License
 

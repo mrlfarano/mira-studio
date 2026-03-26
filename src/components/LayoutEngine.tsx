@@ -24,6 +24,7 @@ import { ReplayPanel } from '@/panels/replay/index.ts';
 import { ProjectMapPanel } from '@/panels/project-map/index.ts';
 import { RegistryPanel } from '@/panels/registry/index.ts';
 import { PairModePanel } from '@/panels/pair/index.ts';
+import PanelErrorBoundary from '@/components/PanelErrorBoundary.tsx';
 import { useLayoutStore, MIN_PANEL_W, MIN_PANEL_H } from '@/store/layout-store';
 
 // ---------------------------------------------------------------------------
@@ -147,24 +148,26 @@ const LayoutEngine: React.FC = () => {
                 zIndex={p.zIndex}
                 minimized={p.minimized}
               >
-                {p.type === 'terminal' && (
-                  <TerminalPanel
-                    sessionId={(p.props?.sessionId as string) ?? p.id}
-                  />
-                )}
-                {p.type === 'companion' && <CompanionPanel />}
-                {p.type === 'kanban' && <KanbanBoard />}
-                {p.type === 'si' && <SIPanel />}
-                {p.type === 'journal' && <JournalPanel />}
-                {p.type === 'mcp' && <McpStatusPanel />}
-                {p.type === 'deploy' && <DeployPanel />}
-                {p.type === 'context-cleaner' && <ContextCleanerPanel />}
-                {p.type === 'vibe' && <VibePanel />}
-                {p.type === 'observability' && <ObservabilityPanel />}
-                {p.type === 'replay' && <ReplayPanel />}
-                {p.type === 'project-map' && <ProjectMapPanel />}
-                {p.type === 'registry' && <RegistryPanel />}
-                {p.type === 'pair' && <PairModePanel />}
+                <PanelErrorBoundary panelId={p.id} panelType={p.type}>
+                  {p.type === 'terminal' && (
+                    <TerminalPanel
+                      sessionId={(p.props?.sessionId as string) ?? p.id}
+                    />
+                  )}
+                  {p.type === 'companion' && <CompanionPanel />}
+                  {p.type === 'kanban' && <KanbanBoard />}
+                  {p.type === 'si' && <SIPanel />}
+                  {p.type === 'journal' && <JournalPanel />}
+                  {p.type === 'mcp' && <McpStatusPanel />}
+                  {p.type === 'deploy' && <DeployPanel />}
+                  {p.type === 'context-cleaner' && <ContextCleanerPanel />}
+                  {p.type === 'vibe' && <VibePanel />}
+                  {p.type === 'observability' && <ObservabilityPanel />}
+                  {p.type === 'replay' && <ReplayPanel />}
+                  {p.type === 'project-map' && <ProjectMapPanel />}
+                  {p.type === 'registry' && <RegistryPanel />}
+                  {p.type === 'pair' && <PairModePanel />}
+                </PanelErrorBoundary>
               </Panel>
             </div>
           ))}

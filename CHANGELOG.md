@@ -5,6 +5,33 @@ All notable changes to Mira Studio will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.2.0] - 2026-03-26
+
+### Added
+
+- **Agent Broadcast** — send prompts to all active agent sessions simultaneously via REST endpoint and Quick Prompt Bar toggle
+- **Deploy Panel** — one-click deploys via MCP tool invocation with status tracking
+- **Context Cleaner** — per-session buffer stats, prune/clear actions, StatusBar usage indicator
+- **Vibe Score** — 4-factor session energy metric (error rate, build success, session activity, time-on-task) with SVG gauge panel and StatusBar badge
+- **Screenshot-to-Task** — drop/paste screenshots into Kanban board, vision LLM generates task cards
+- **Observability Workspace** — tabbed panel with process list, port scanner, and agent activity history
+- **Session Replay** — in-memory PTY recording with timeline scrubber, play/pause, 1x/2x/4x speed controls
+- **Project Map** — git log-based file change treemap with heat-color coding and recent changes list
+- **Community Registry** — browse/install workspace configs from GitHub-based registry with card grid UI
+- **Pair Mode** — real-time workspace sharing via WebSocket relay with Owner/Guest permission model and in-session chat
+- **SI Autonomous Build Agent** — safety-gated improvement cycles on isolated `mira/si-*` branches with consent-before-PR gate
+- **Build Journal Panel** — client-side timeline view with date navigation and daily summary generation
+- 169 new tests (45 frontend, 102 server, 22 E2E) covering all new features including 28 safety-critical SI tests
+
+### Changed
+
+- Companion panel now streams real LLM responses via SSE (was mocked)
+- Kanban board renders as real component in LayoutEngine (was placeholder)
+- Send-to-Agent validates sessions and dispatches notifications on failure
+- Command Palette actions fully wired (was no-ops)
+- Quick Prompt Bar has command history (localStorage) and preset chips
+- StatusBar shows vibe score, context usage, and pair mode indicators
+
 ## [0.1.0] - 2026-03-26
 
 ### Added

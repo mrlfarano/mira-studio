@@ -203,6 +203,40 @@ function useDefaultCommands() {
         },
       },
       {
+        id: "registry.open",
+        label: "Open Community Registry",
+        description: "Browse and install community workspace configs",
+        category: "Panels",
+        action: () => {
+          useLayoutStore.getState().addPanel({
+            id: `registry-${Date.now()}`,
+            type: "registry",
+            title: "Community Registry",
+            x: 0,
+            y: 4,
+            w: 8,
+            h: 4,
+          });
+        },
+      },
+      {
+        id: "pair.open",
+        label: "Open Pair Mode",
+        description: "Real-time shared workspace with another developer",
+        category: "Panels",
+        action: () => {
+          useLayoutStore.getState().addPanel({
+            id: `pair-${Date.now()}`,
+            type: "pair",
+            title: "Pair Mode",
+            x: 0,
+            y: 4,
+            w: 6,
+            h: 5,
+          });
+        },
+      },
+      {
         id: "agent.broadcast",
         label: "Broadcast to All Agents",
         description: "Open Quick Prompt in broadcast mode",

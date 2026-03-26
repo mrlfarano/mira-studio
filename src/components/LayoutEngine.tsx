@@ -22,6 +22,8 @@ import { VibePanel } from '@/panels/vibe/index.ts';
 import { ObservabilityPanel } from '@/panels/observability/index.ts';
 import { ReplayPanel } from '@/panels/replay/index.ts';
 import { ProjectMapPanel } from '@/panels/project-map/index.ts';
+import { RegistryPanel } from '@/panels/registry/index.ts';
+import { PairModePanel } from '@/panels/pair/index.ts';
 import { useLayoutStore, MIN_PANEL_W, MIN_PANEL_H } from '@/store/layout-store';
 
 // ---------------------------------------------------------------------------
@@ -161,6 +163,8 @@ const LayoutEngine: React.FC = () => {
                 {p.type === 'observability' && <ObservabilityPanel />}
                 {p.type === 'replay' && <ReplayPanel />}
                 {p.type === 'project-map' && <ProjectMapPanel />}
+                {p.type === 'registry' && <RegistryPanel />}
+                {p.type === 'pair' && <PairModePanel />}
               </Panel>
             </div>
           ))}

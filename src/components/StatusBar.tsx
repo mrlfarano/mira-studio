@@ -51,6 +51,40 @@ function contextColor(ratio: number): string {
   return '#2ecc71'
 }
 
+const PAIR_API = 'http://127.0.0.1:3001/api/pair/sessions'
+const PAIR_POLL_MS = 10_000
+
+interface PairSessionInfo {
+  id: string
+  ownerName: string
+  guestName: string | null
+}
+
+function usePairIndicator() {
+  const [activePair, setActivePair] = useState<PairSessionInfo | null>(null)
+
+  useEffect(() => {
+    let cancelled = false
+    const poll = async () => {
+      try {
+        const res = await fetch(PAIR_API)
+        if (!res.ok || cancelled) return
+        const sessions = await res.json() as PairSessionInfo[]
+        if (!cancelled) {
+          setActivePair(sessions.length > 0 ? sessions[0] : null)
+        }
+      } catch {
+        // server unreachable — keep last known value
+      }
+    }
+    void poll()
+    const timer = setInterval(poll, PAIR_POLL_MS)
+    return () => { cancelled = true; clearInterval(timer) }
+  }, [])
+
+  return activePair
+}
+
 const VIBE_API = 'http://127.0.0.1:3001/api/vibe'
 
 function vibeColor(score: number): string {
@@ -65,6 +99,7 @@ const StatusBar: React.FC = () => {
   const isSyncing = useConfigStore((s) => s.isSyncing);
   const syncError = useConfigStore((s) => s.syncError);
   const { totalTokens, maxRatio } = useContextIndicator();
+  const activePair = usePairIndicator();
 
   // Vibe score state
   const [vibeScore, setVibeScore] = useState<number | null>(null)
@@ -100,6 +135,21 @@ const StatusBar: React.FC = () => {
       y: 0,
       w: 3,
       h: 4,
+    })
+  }, [])
+
+  const openPairPanel = useCallback(() => {
+    const store = useLayoutStore.getState()
+    const existing = store.panels.find((p) => p.type === 'pair')
+    if (existing) return
+    store.addPanel({
+      id: `pair-${Date.now()}`,
+      type: 'pair',
+      title: 'Pair Mode',
+      x: 0,
+      y: 4,
+      w: 6,
+      h: 5,
     })
   }, [])
 
@@ -147,6 +197,39 @@ const StatusBar: React.FC = () => {
         <span className="statusbar__indicator">{agentLabel}</span>
       </div>
       <div className="statusbar__right">
+        {activePair && (
+          <button
+            onClick={openPairPanel}
+            className="statusbar__indicator"
+            style={{
+              display: 'inline-flex',
+              alignItems: 'center',
+              gap: 6,
+              background: 'none',
+              border: 'none',
+              cursor: 'pointer',
+              padding: '2px 8px',
+              borderRadius: 4,
+              color: 'inherit',
+              fontSize: 'inherit',
+              fontFamily: 'inherit',
+            }}
+            title={`Pair session with ${activePair.guestName ?? 'waiting for guest'}`}
+          >
+            <span
+              style={{
+                display: 'inline-block',
+                width: 8,
+                height: 8,
+                borderRadius: '50%',
+                background: activePair.guestName ? '#6366f1' : '#f59e0b',
+              }}
+            />
+            <span style={{ color: '#a5b4fc', fontWeight: 600 }}>
+              Pair: {activePair.id}
+            </span>
+          </button>
+        )}
         {vibeScore !== null && (
           <button
             onClick={openVibePanel}

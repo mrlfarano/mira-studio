@@ -17,6 +17,8 @@ import { registerVibeRoutes } from "./vibe/index.js";
 import { registerObservabilityRoutes } from "./observability/index.js";
 import { registerReplayRoutes } from "./replay/index.js";
 import { registerProjectMapRoutes } from "./project-map/index.js";
+import { registerRegistryRoutes } from "./registry/index.js";
+import { registerPairRoutes } from "./pair/index.js";
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 const PROJECT_ROOT = path.resolve(__dirname, "..", "..");
@@ -149,9 +151,9 @@ server.log.info("McpBridge initialised");
 await registerSnapshotRoutes(server, configEngine);
 server.log.info("SnapshotEngine initialised");
 
-// Register Self-Improvement (SI) engine and REST routes
-await registerSIRoutes(server, PROJECT_ROOT);
-server.log.info("SIEngine initialised");
+// Register Self-Improvement (SI) engine and REST routes (with PtyManager for SI Agent)
+await registerSIRoutes(server, PROJECT_ROOT, ptyManager);
+server.log.info("SIEngine + SIAgent initialised");
 
 // Register Vibe Score engine and REST routes
 registerVibeRoutes(server, PROJECT_ROOT, ptyManager, journalEngine);
@@ -168,6 +170,14 @@ server.log.info("ReplayEngine initialised");
 // Register Project Map engine and REST routes
 registerProjectMapRoutes(server, PROJECT_ROOT);
 server.log.info("ProjectMapEngine initialised");
+
+// Register Community Registry routes
+registerRegistryRoutes(server, configEngine.getConfigDir());
+server.log.info("RegistryClient initialised");
+
+// Register Pair Mode routes (WebSocket relay for shared workspaces)
+registerPairRoutes(server);
+server.log.info("PairSessionManager initialised");
 
 // Graceful shutdown: generate daily summary, kill PTY sessions, close server
 const shutdown = async (signal: string) => {

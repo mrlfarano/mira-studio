@@ -216,6 +216,25 @@ export class PtyManager extends EventEmitter {
   }
 
   /**
+   * List all active sessions with metadata (no IPty handle exposed).
+   */
+  listSessions(): Array<{
+    id: string
+    status: PtyStatus
+    pid: number
+    createdAt: Date
+    bufferLines: number
+  }> {
+    return Array.from(this.sessions.values()).map((s) => ({
+      id: s.id,
+      status: s.status,
+      pid: s.pty.pid,
+      createdAt: s.createdAt,
+      bufferLines: s.outputBuffer.length,
+    }))
+  }
+
+  /**
    * Get context stats for a single session's output buffer.
    */
   getContextStats(id: string): ContextStats | undefined {

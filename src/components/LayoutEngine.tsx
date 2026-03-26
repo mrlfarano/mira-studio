@@ -19,6 +19,9 @@ import McpStatusPanel from '@/components/McpStatusPanel.tsx';
 import { DeployPanel } from '@/panels/deploy/index.ts';
 import { ContextCleanerPanel } from '@/panels/context-cleaner/index.ts';
 import { VibePanel } from '@/panels/vibe/index.ts';
+import { ObservabilityPanel } from '@/panels/observability/index.ts';
+import { ReplayPanel } from '@/panels/replay/index.ts';
+import { ProjectMapPanel } from '@/panels/project-map/index.ts';
 import { useLayoutStore, MIN_PANEL_W, MIN_PANEL_H } from '@/store/layout-store';
 
 // ---------------------------------------------------------------------------
@@ -155,6 +158,9 @@ const LayoutEngine: React.FC = () => {
                 {p.type === 'deploy' && <DeployPanel />}
                 {p.type === 'context-cleaner' && <ContextCleanerPanel />}
                 {p.type === 'vibe' && <VibePanel />}
+                {p.type === 'observability' && <ObservabilityPanel />}
+                {p.type === 'replay' && <ReplayPanel />}
+                {p.type === 'project-map' && <ProjectMapPanel />}
               </Panel>
             </div>
           ))}

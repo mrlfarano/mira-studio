@@ -152,6 +152,57 @@ function useDefaultCommands() {
         },
       },
       {
+        id: "observability.open",
+        label: "Open Observability",
+        description: "Show process list, port health, and agent history",
+        category: "Panels",
+        action: () => {
+          useLayoutStore.getState().addPanel({
+            id: `observability-${Date.now()}`,
+            type: "observability",
+            title: "Observability",
+            x: 0,
+            y: 4,
+            w: 8,
+            h: 4,
+          });
+        },
+      },
+      {
+        id: "replay.open",
+        label: "Open Session Replay",
+        description: "Browse and replay recorded terminal sessions",
+        category: "Panels",
+        action: () => {
+          useLayoutStore.getState().addPanel({
+            id: `replay-${Date.now()}`,
+            type: "replay",
+            title: "Session Replay",
+            x: 0,
+            y: 4,
+            w: 8,
+            h: 4,
+          });
+        },
+      },
+      {
+        id: "project-map.open",
+        label: "Open Project Map",
+        description: "Visualise codebase file tree with git change frequency",
+        category: "Panels",
+        action: () => {
+          useLayoutStore.getState().addPanel({
+            id: `project-map-${Date.now()}`,
+            type: "project-map",
+            title: "Project Map",
+            x: 0,
+            y: 4,
+            w: 8,
+            h: 4,
+          });
+        },
+      },
+      {
         id: "agent.broadcast",
         label: "Broadcast to All Agents",
         description: "Open Quick Prompt in broadcast mode",

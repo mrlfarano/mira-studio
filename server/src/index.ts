@@ -14,6 +14,9 @@ import { registerMcpRoutes } from "./mcp/index.js";
 import { registerSnapshotRoutes } from "./snapshot/index.js";
 import { registerSIRoutes } from "./si/index.js";
 import { registerVibeRoutes } from "./vibe/index.js";
+import { registerObservabilityRoutes } from "./observability/index.js";
+import { registerReplayRoutes } from "./replay/index.js";
+import { registerProjectMapRoutes } from "./project-map/index.js";
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 const PROJECT_ROOT = path.resolve(__dirname, "..", "..");
@@ -153,6 +156,18 @@ server.log.info("SIEngine initialised");
 // Register Vibe Score engine and REST routes
 registerVibeRoutes(server, PROJECT_ROOT, ptyManager, journalEngine);
 server.log.info("VibeEngine initialised");
+
+// Register Observability workspace routes
+registerObservabilityRoutes(server, ptyManager, journalEngine);
+server.log.info("Observability routes initialised");
+
+// Register Session Replay engine and REST routes
+registerReplayRoutes(server, ptyManager, configEngine.getConfigDir());
+server.log.info("ReplayEngine initialised");
+
+// Register Project Map engine and REST routes
+registerProjectMapRoutes(server, PROJECT_ROOT);
+server.log.info("ProjectMapEngine initialised");
 
 // Graceful shutdown: generate daily summary, kill PTY sessions, close server
 const shutdown = async (signal: string) => {

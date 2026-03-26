@@ -1,4 +1,5 @@
 import path from "node:path";
+import fs from "node:fs/promises";
 import { fileURLToPath } from "node:url";
 import Fastify from "fastify";
 import cors from "@fastify/cors";
@@ -110,6 +111,51 @@ server.post<{ Params: { sessionId: string } }>(
 // Health check endpoint
 server.get("/api/health", async () => {
   return { status: "ok" };
+});
+
+// ── Spark Canvas persistence ────────────────────────────────────────────────
+
+const canvasDir = path.join(PROJECT_ROOT, ".mira", "canvases");
+
+server.post<{ Body: { name: string; elements: unknown[] } }>(
+  "/api/canvas/save",
+  async (request, reply) => {
+    const { name, elements } = request.body;
+    if (!name || !Array.isArray(elements)) {
+      return reply.status(400).send({ error: "name and elements[] required" });
+    }
+    await fs.mkdir(canvasDir, { recursive: true });
+    const filePath = path.join(canvasDir, `${name}.json`);
+    await fs.writeFile(filePath, JSON.stringify({ name, elements }, null, 2), "utf-8");
+    return { ok: true, name };
+  },
+);
+
+server.get<{ Params: { name: string } }>(
+  "/api/canvas/:name",
+  async (request, reply) => {
+    const { name } = request.params;
+    const filePath = path.join(canvasDir, `${name}.json`);
+    try {
+      const raw = await fs.readFile(filePath, "utf-8");
+      return JSON.parse(raw);
+    } catch {
+      return reply.status(404).send({ error: `Canvas '${name}' not found` });
+    }
+  },
+);
+
+server.get("/api/canvas", async () => {
+  try {
+    await fs.mkdir(canvasDir, { recursive: true });
+    const files = await fs.readdir(canvasDir);
+    const canvases = files
+      .filter((f) => f.endsWith(".json"))
+      .map((f) => f.replace(/\.json$/, ""));
+    return { canvases };
+  } catch {
+    return { canvases: [] };
+  }
 });
 
 // Register .mira/ config engine and REST routes

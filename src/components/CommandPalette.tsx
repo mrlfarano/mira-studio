@@ -237,6 +237,23 @@ function useDefaultCommands() {
         },
       },
       {
+        id: "spark.open",
+        label: "Open Spark Canvas",
+        description: "Freeform whiteboard for brainstorming and ideation",
+        category: "Panels",
+        action: () => {
+          useLayoutStore.getState().addPanel({
+            id: `spark-${Date.now()}`,
+            type: "spark",
+            title: "Spark Canvas",
+            x: 0,
+            y: 4,
+            w: 8,
+            h: 5,
+          });
+        },
+      },
+      {
         id: "agent.broadcast",
         label: "Broadcast to All Agents",
         description: "Open Quick Prompt in broadcast mode",

@@ -123,6 +123,22 @@ export class McpBridge {
     return out;
   }
 
+  /** Call a tool on a specific connection. */
+  async callTool(
+    connectionId: string,
+    toolName: string,
+    args: Record<string, unknown>,
+  ): Promise<unknown> {
+    const conn = this.connections.get(connectionId);
+    if (!conn) throw new Error(`Connection ${connectionId} not found`);
+    if (conn.status !== "connected") {
+      throw new Error(`Connection ${connectionId} is not connected`);
+    }
+
+    const result = await conn.client.callTool({ name: toolName, arguments: args });
+    return result;
+  }
+
   /** Disconnect every active connection (used during shutdown). */
   async disconnectAll(): Promise<void> {
     for (const id of this.connections.keys()) {

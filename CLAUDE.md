@@ -153,3 +153,7 @@ Skills extend Mira via a manifest declaring: `cornerstones[]`, `panels[]`, `agen
 **Deferred to v1.x:** Agent Broadcast, Context Cleaner, Screenshot-to-task, Spark Canvas, Project Map, Session Replay, Vibe Score, Deploy Panel, Pair Mode, SI autonomous build agent.
 
 **Out of scope:** File manager, code editor, mobile, enterprise SSO, billing.
+
+### Target Platforms
+
+macOS, Windows, Linux. v1 is browser + local server. v2 wraps in Tauri (sidecar model — Tauri launches the Fastify server as a bundled process). No mobile.

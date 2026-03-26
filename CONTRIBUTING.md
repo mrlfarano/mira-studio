@@ -387,3 +387,7 @@ The Self-Improvement agent:
 - Frontend never spawns processes or touches the filesystem
 - Server never renders UI or manages DOM state
 - All communication is REST, WebSocket, or SSE — no shared memory
+
+### Target Platforms
+
+macOS, Windows, and Linux. No mobile. v1 runs as browser + local server. v2 wraps in Tauri (sidecar model — Tauri launches the Fastify server as a bundled process).

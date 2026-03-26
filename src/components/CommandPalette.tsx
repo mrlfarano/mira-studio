@@ -1,5 +1,9 @@
 import { useEffect, useRef, useState, useMemo, useCallback } from "react";
 import { useCommandStore } from "@/store/command-store.ts";
+import { useCompanionStore } from "@/store/companion-store.ts";
+import { useConfigStore } from "@/store/config-store.ts";
+import { useLayoutStore } from "@/store/layout-store.ts";
+import { useSessionStore } from "@/store/session-store.ts";
 import { useHotkeys } from "@/hooks/useHotkeys.ts";
 import type { Command, CommandCategory } from "@/types/command.ts";
 
@@ -56,7 +60,7 @@ function useDefaultCommands() {
         shortcut: "Meta+Shift+C",
         category: "Panels",
         action: () => {
-          /* wired up by companion panel */
+          useCompanionStore.getState().toggleExpanded();
         },
       },
       {
@@ -66,7 +70,103 @@ function useDefaultCommands() {
         shortcut: "Meta+Shift+T",
         category: "Panels",
         action: () => {
-          /* wired up by terminal panel */
+          const id = `terminal-${Date.now()}`;
+          useLayoutStore.getState().addPanel({
+            id,
+            type: "terminal",
+            title: "Terminal",
+            x: 0,
+            y: 0,
+            w: 6,
+            h: 4,
+            props: { sessionId: id },
+          });
+        },
+      },
+      {
+        id: "kanban.open",
+        label: "Open Kanban Board",
+        description: "Add a Kanban board panel",
+        category: "Panels",
+        action: () => {
+          useLayoutStore.getState().addPanel({
+            id: `kanban-${Date.now()}`,
+            type: "kanban",
+            title: "Kanban Board",
+            x: 0,
+            y: 4,
+            w: 10,
+            h: 3,
+          });
+        },
+      },
+      {
+        id: "si.open",
+        label: "Open SI Panel",
+        description: "Show the Self-Improvement panel",
+        category: "Panels",
+        action: () => {
+          useLayoutStore.getState().addPanel({
+            id: `si-${Date.now()}`,
+            type: "si",
+            title: "Self-Improvement",
+            x: 6,
+            y: 0,
+            w: 6,
+            h: 4,
+          });
+        },
+      },
+      {
+        id: "journal.open",
+        label: "Open Build Journal",
+        description: "Show the build journal timeline",
+        category: "Panels",
+        action: () => {
+          useLayoutStore.getState().addPanel({
+            id: `journal-${Date.now()}`,
+            type: "journal",
+            title: "Build Journal",
+            x: 0,
+            y: 4,
+            w: 6,
+            h: 3,
+          });
+        },
+      },
+      {
+        id: "deploy.open",
+        label: "Open Deploy Panel",
+        description: "One-click deploy via MCP tool invocation",
+        category: "Panels",
+        action: () => {
+          useLayoutStore.getState().addPanel({
+            id: `deploy-${Date.now()}`,
+            type: "deploy",
+            title: "Deploy",
+            x: 0,
+            y: 4,
+            w: 6,
+            h: 3,
+          });
+        },
+      },
+      {
+        id: "agent.broadcast",
+        label: "Broadcast to All Agents",
+        description: "Open Quick Prompt in broadcast mode",
+        category: "Agent",
+        action: () => {
+          // Open quick prompt — broadcast mode will be toggled by user
+          const current = useSessionStore.getState();
+          if (Object.keys(current.sessions).length >= 2) {
+            useCommandStore.getState().setOpen(false);
+            // Trigger the quick prompt toggle via its command
+            const qp = useCommandStore.getState().commands.find(
+              (c) => c.id === "quickPrompt.toggle.meta",
+            );
+            qp?.action();
+          }
         },
       },
       {
@@ -76,7 +176,11 @@ function useDefaultCommands() {
         shortcut: "Meta+Shift+P",
         category: "Config",
         action: () => {
-          /* wired up by config store */
+          const profiles = ["Minimal", "Balanced", "FullSend"] as const;
+          const current = useConfigStore.getState().config?.activeProfile;
+          const idx = profiles.indexOf(current as typeof profiles[number]);
+          const next = profiles[(idx + 1) % profiles.length];
+          useConfigStore.getState().patchConfig({ activeProfile: next });
         },
       },
     ];

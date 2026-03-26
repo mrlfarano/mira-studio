@@ -41,6 +41,26 @@ class RingBuffer {
     }
     return [...this.buf.slice(this.head), ...this.buf.slice(0, this.head)];
   }
+
+  /** Reset the buffer, discarding all stored lines. */
+  clear(): void {
+    this.buf = new Array<string>(this.capacity);
+    this.head = 0;
+    this.count = 0;
+  }
+
+  /** Current number of stored lines. */
+  get length(): number {
+    return this.count;
+  }
+}
+
+// ── Context stats type ───────────────────────────────────────────────────────
+
+export interface ContextStats {
+  totalLines: number
+  estimatedTokens: number
+  outputSizeBytes: number
 }
 
 // ── Session type ─────────────────────────────────────────────────────────────
@@ -193,6 +213,47 @@ export class PtyManager extends EventEmitter {
    */
   get size(): number {
     return this.sessions.size;
+  }
+
+  /**
+   * Get context stats for a single session's output buffer.
+   */
+  getContextStats(id: string): ContextStats | undefined {
+    const session = this.sessions.get(id)
+    if (!session) return undefined
+    const lines = session.outputBuffer.toArray()
+    const totalLines = lines.length
+    const totalChars = lines.reduce((sum, l) => sum + l.length, 0)
+    const outputSizeBytes = lines.reduce(
+      (sum, l) => sum + Buffer.byteLength(l, 'utf-8'),
+      0,
+    )
+    return {
+      totalLines,
+      estimatedTokens: Math.ceil(totalChars / 4),
+      outputSizeBytes,
+    }
+  }
+
+  /**
+   * Clear a session's output buffer.
+   */
+  clearBuffer(id: string): void {
+    const session = this.sessions.get(id)
+    if (!session) throw new Error(`PTY session not found: ${id}`)
+    session.outputBuffer.clear()
+  }
+
+  /**
+   * Get context stats for all active sessions.
+   */
+  getAllContextStats(): Record<string, ContextStats> {
+    const result: Record<string, ContextStats> = {}
+    for (const [id] of this.sessions) {
+      const stats = this.getContextStats(id)
+      if (stats) result[id] = stats
+    }
+    return result
   }
 
   // ── Internals ────────────────────────────────────────────────────────────

@@ -13,6 +13,7 @@ import { registerCompanionRoutes } from "./companion/index.js";
 import { registerMcpRoutes } from "./mcp/index.js";
 import { registerSnapshotRoutes } from "./snapshot/index.js";
 import { registerSIRoutes } from "./si/index.js";
+import { registerVibeRoutes } from "./vibe/index.js";
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 const PROJECT_ROOT = path.resolve(__dirname, "..", "..");
@@ -34,6 +35,72 @@ const ptyManager = new PtyManager();
 
 // Register PTY WebSocket routes
 registerPtyRoutes(server, ptyManager);
+
+// PTY broadcast endpoint — send input to multiple sessions simultaneously
+server.post<{
+  Body: { data: string; sessionIds: string[] };
+}>("/api/pty/broadcast", async (request, reply) => {
+  const { data, sessionIds } = request.body;
+  if (!data || !Array.isArray(sessionIds) || sessionIds.length === 0) {
+    return reply.status(400).send({ error: "data and sessionIds[] required" });
+  }
+
+  const results = await Promise.allSettled(
+    sessionIds.map((id) => {
+      if (!ptyManager.has(id)) {
+        return Promise.reject(new Error(`Session ${id} not found`));
+      }
+      ptyManager.write(id, data);
+      return Promise.resolve(id);
+    }),
+  );
+
+  const sent = results
+    .filter((r) => r.status === "fulfilled")
+    .map((r) => (r as PromiseFulfilledResult<string>).value);
+  const failed = results
+    .filter((r) => r.status === "rejected")
+    .map((r, i) => ({
+      sessionId: sessionIds[i],
+      error: (r as PromiseRejectedResult).reason?.message ?? "Unknown error",
+    }));
+
+  return { sent, failed };
+});
+
+// ── Context Cleaner endpoints ────────────────────────────────────────────────
+
+// Get context stats for all sessions
+server.get("/api/pty/context-stats", async () => {
+  return ptyManager.getAllContextStats();
+});
+
+// Get context stats for a single session
+server.get<{ Params: { sessionId: string } }>(
+  "/api/pty/:sessionId/context-stats",
+  async (request, reply) => {
+    const { sessionId } = request.params;
+    const stats = ptyManager.getContextStats(sessionId);
+    if (!stats) {
+      return reply.status(404).send({ error: `Session ${sessionId} not found` });
+    }
+    return stats;
+  },
+);
+
+// Clear buffer for a single session
+server.post<{ Params: { sessionId: string } }>(
+  "/api/pty/:sessionId/clear-buffer",
+  async (request, reply) => {
+    const { sessionId } = request.params;
+    try {
+      ptyManager.clearBuffer(sessionId);
+      return { ok: true };
+    } catch {
+      return reply.status(404).send({ error: `Session ${sessionId} not found` });
+    }
+  },
+);
 
 // Health check endpoint
 server.get("/api/health", async () => {
@@ -82,6 +149,10 @@ server.log.info("SnapshotEngine initialised");
 // Register Self-Improvement (SI) engine and REST routes
 await registerSIRoutes(server, PROJECT_ROOT);
 server.log.info("SIEngine initialised");
+
+// Register Vibe Score engine and REST routes
+registerVibeRoutes(server, PROJECT_ROOT, ptyManager, journalEngine);
+server.log.info("VibeEngine initialised");
 
 // Graceful shutdown: generate daily summary, kill PTY sessions, close server
 const shutdown = async (signal: string) => {

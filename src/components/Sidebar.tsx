@@ -5,6 +5,7 @@ const MODULE_LIST = [
   { id: 'terminal', label: 'Terminal', icon: '>' },
   { id: 'companion', label: 'Companion', icon: 'C' },
   { id: 'kanban', label: 'Kanban', icon: 'K' },
+  { id: 'journal', label: 'Journal', icon: 'J' },
 ] as const;
 
 const QUICK_ACTIONS = [

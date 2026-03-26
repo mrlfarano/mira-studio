@@ -125,17 +125,26 @@ const KanbanCard: React.FC<Props> = ({ card }) => {
     [card.id],
   );
 
+  const [errorDetail, setErrorDetail] = useState<string | null>(null);
+
   const doSend = useCallback(
     async (sessionId: string) => {
       setSendState('sending');
+      setErrorDetail(null);
       const result = await sendToAgent(card, sessionId);
       setSendState(result.success ? 'sent' : 'error');
+      if (!result.success) {
+        setErrorDetail(result.error ?? 'Unknown error');
+      }
 
       // Reset visual feedback after a delay
       if (result.success) {
         setTimeout(() => setSendState('idle'), 2_000);
       } else {
-        setTimeout(() => setSendState('idle'), 3_000);
+        setTimeout(() => {
+          setSendState('idle');
+          setErrorDetail(null);
+        }, 4_000);
       }
     },
     [card],
@@ -145,7 +154,12 @@ const KanbanCard: React.FC<Props> = ({ card }) => {
     if (card.status === 'in-agent' || card.status === 'done') return;
 
     if (activeSessions.length === 0) {
-      // No sessions — nothing to do, could show a notification in the future
+      setSendState('error');
+      setErrorDetail('No active agent sessions');
+      setTimeout(() => {
+        setSendState('idle');
+        setErrorDetail(null);
+      }, 3_000);
       return;
     }
     if (activeSessions.length === 1) {
@@ -286,6 +300,22 @@ const KanbanCard: React.FC<Props> = ({ card }) => {
           />
         )}
       </div>
+
+      {/* Error detail */}
+      {sendState === 'error' && errorDetail && (
+        <div
+          style={{
+            fontSize: 10,
+            color: '#ef4444',
+            marginTop: 6,
+            padding: '4px 6px',
+            background: '#ef444411',
+            borderRadius: 4,
+          }}
+        >
+          {errorDetail}
+        </div>
+      )}
     </div>
   );
 };

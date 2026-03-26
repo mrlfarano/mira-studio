@@ -1,7 +1,8 @@
-import React, { useCallback, useRef, useEffect, useState } from 'react';
-import { useCompanionStore } from '@/store/companion-store.ts';
-import CompanionMessage from './CompanionMessage.tsx';
-import CompanionAvatar from './CompanionAvatar.tsx';
+import React, { useCallback, useRef, useEffect, useState } from 'react'
+import { useCompanionStore } from '@/store/companion-store.ts'
+import { useCompanionChat } from '@/hooks/useCompanionChat.ts'
+import CompanionMessage from './CompanionMessage.tsx'
+import CompanionAvatar from './CompanionAvatar.tsx'
 
 // ---------------------------------------------------------------------------
 // Typing indicator (three bouncing dots)
@@ -73,57 +74,40 @@ const PersonalityBadge: React.FC<{ tone: string; verbosity: number }> = ({
 // ---------------------------------------------------------------------------
 
 const CompanionPanel: React.FC = () => {
-  const messages = useCompanionStore((s) => s.messages);
-  const isExpanded = useCompanionStore((s) => s.isExpanded);
-  const personality = useCompanionStore((s) => s.personality);
-  const addMessage = useCompanionStore((s) => s.addMessage);
-  const toggleExpanded = useCompanionStore((s) => s.toggleExpanded);
+  const messages = useCompanionStore((s) => s.messages)
+  const isExpanded = useCompanionStore((s) => s.isExpanded)
+  const personality = useCompanionStore((s) => s.personality)
+  const isStreaming = useCompanionStore((s) => s.isStreaming)
+  const toggleExpanded = useCompanionStore((s) => s.toggleExpanded)
 
-  const [inputValue, setInputValue] = useState('');
-  const [isStreaming, setIsStreaming] = useState(false);
-  const messagesEndRef = useRef<HTMLDivElement>(null);
-  const inputRef = useRef<HTMLInputElement>(null);
+  const { sendMessage } = useCompanionChat()
+
+  const [inputValue, setInputValue] = useState('')
+  const messagesEndRef = useRef<HTMLDivElement>(null)
+  const inputRef = useRef<HTMLInputElement>(null)
 
   // Auto-scroll to bottom on new messages
   useEffect(() => {
-    messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
-  }, [messages, isStreaming]);
+    messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' })
+  }, [messages, isStreaming])
 
   const handleSend = useCallback(() => {
-    const text = inputValue.trim();
-    if (!text) return;
+    const text = inputValue.trim()
+    if (!text || isStreaming) return
 
-    addMessage({
-      id: `user-${Date.now()}`,
-      role: 'user',
-      text,
-      timestamp: Date.now(),
-    });
-
-    setInputValue('');
-
-    // Simulate streaming response (will be replaced by real WS integration)
-    setIsStreaming(true);
-    setTimeout(() => {
-      addMessage({
-        id: `companion-${Date.now()}`,
-        role: 'companion',
-        text: `Got it! I'll help you with that.`,
-        timestamp: Date.now(),
-      });
-      setIsStreaming(false);
-    }, 1200);
-  }, [inputValue, addMessage]);
+    setInputValue('')
+    void sendMessage(text)
+  }, [inputValue, isStreaming, sendMessage])
 
   const handleKeyDown = useCallback(
     (e: React.KeyboardEvent) => {
       if (e.key === 'Enter' && !e.shiftKey) {
-        e.preventDefault();
-        handleSend();
+        e.preventDefault()
+        handleSend()
       }
     },
     [handleSend],
-  );
+  )
 
   // ---- Collapsed state ----
   if (!isExpanded) {
@@ -231,14 +215,14 @@ const CompanionPanel: React.FC = () => {
         />
         <button
           onClick={handleSend}
-          disabled={!inputValue.trim()}
+          disabled={!inputValue.trim() || isStreaming}
           aria-label="Send message"
           style={{
-            background: inputValue.trim() ? '#6366f1' : '#333',
+            background: inputValue.trim() && !isStreaming ? '#6366f1' : '#333',
             border: 'none',
             borderRadius: '6px',
             color: '#fff',
-            cursor: inputValue.trim() ? 'pointer' : 'default',
+            cursor: inputValue.trim() && !isStreaming ? 'pointer' : 'default',
             fontSize: '13px',
             padding: '6px 14px',
             fontWeight: 600,

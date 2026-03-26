@@ -3,11 +3,12 @@
  * MCP Connection Wizard: connect, disconnect, list, discover, tools.
  *
  * Routes:
- *   GET    /api/mcp/connections            — list all connections
- *   POST   /api/mcp/connect                — connect to a new MCP server
- *   DELETE  /api/mcp/connections/:id        — disconnect a server
- *   GET    /api/mcp/discover               — auto-discovery scan
- *   GET    /api/mcp/connections/:id/tools   — list tools for a connection
+ *   GET    /api/mcp/connections              — list all connections
+ *   POST   /api/mcp/connect                  — connect to a new MCP server
+ *   DELETE  /api/mcp/connections/:id          — disconnect a server
+ *   GET    /api/mcp/discover                 — auto-discovery scan
+ *   GET    /api/mcp/connections/:id/tools     — list tools for a connection
+ *   POST   /api/mcp/connections/:id/call-tool — invoke a tool on a connection
  */
 
 import type { FastifyInstance } from "fastify";
@@ -71,6 +72,27 @@ export async function registerMcpRoutes(
       try {
         const tools = await bridge.listTools(req.params.id);
         return reply.send(tools);
+      } catch (err: unknown) {
+        const message = err instanceof Error ? err.message : String(err);
+        return reply.status(404).send({ error: message });
+      }
+    },
+  );
+
+  // POST /api/mcp/connections/:id/call-tool — invoke a tool on a connection
+  app.post<{
+    Params: { id: string };
+    Body: { toolName: string; args: Record<string, unknown> };
+  }>(
+    "/api/mcp/connections/:id/call-tool",
+    async (req, reply) => {
+      const { toolName, args } = req.body ?? {};
+      if (!toolName) {
+        return reply.status(400).send({ error: "toolName is required" });
+      }
+      try {
+        const result = await bridge.callTool(req.params.id, toolName, args ?? {});
+        return reply.send(result);
       } catch (err: unknown) {
         const message = err instanceof Error ? err.message : String(err);
         return reply.status(404).send({ error: message });

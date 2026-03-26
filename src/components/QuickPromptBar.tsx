@@ -123,6 +123,12 @@ export function QuickPromptBar() {
     targetSession,
     allSessions,
     setTargetSessionId,
+    navigateHistory,
+    presets,
+    applyPreset,
+    isBroadcast,
+    toggleBroadcast,
+    broadcast,
   } = useQuickPrompt();
 
   const inputRef = useRef<HTMLInputElement>(null);
@@ -138,13 +144,23 @@ export function QuickPromptBar() {
     (e: React.KeyboardEvent) => {
       if (e.key === "Enter" && !e.shiftKey) {
         e.preventDefault();
-        send();
+        if (isBroadcast) {
+          broadcast();
+        } else {
+          send();
+        }
       } else if (e.key === "Escape") {
         e.preventDefault();
         close();
+      } else if (e.key === "ArrowUp") {
+        e.preventDefault();
+        navigateHistory(-1);
+      } else if (e.key === "ArrowDown") {
+        e.preventDefault();
+        navigateHistory(1);
       }
     },
-    [send, close],
+    [send, broadcast, isBroadcast, close, navigateHistory],
   );
 
   const handleOverlayClick = useCallback(() => {
@@ -160,8 +176,9 @@ export function QuickPromptBar() {
 
   if (!isVisible) return null;
 
-  const canSend = value.trim().length > 0 && targetSession !== null;
-  const showDropdown = allSessions.length > 1;
+  const canSend = value.trim().length > 0 && (isBroadcast ? allSessions.length >= 2 : targetSession !== null);
+  const showDropdown = allSessions.length > 1 && !isBroadcast;
+  const showBroadcastToggle = allSessions.length >= 2;
 
   return (
     <div
@@ -199,7 +216,27 @@ export function QuickPromptBar() {
               <span>No active session</span>
             )}
           </div>
-          <span style={styles.shortcutHint}>Esc to dismiss</span>
+          <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
+            {showBroadcastToggle && (
+              <button
+                type="button"
+                onClick={toggleBroadcast}
+                style={{
+                  fontSize: 11,
+                  padding: "2px 8px",
+                  borderRadius: 4,
+                  border: `1px solid ${isBroadcast ? "var(--accent, #6366f1)" : "var(--border-default, #30363d)"}`,
+                  background: isBroadcast ? "var(--accent, #6366f1)" : "transparent",
+                  color: isBroadcast ? "#fff" : "var(--text-muted, #6e7681)",
+                  cursor: "pointer",
+                  fontWeight: 600,
+                }}
+              >
+                Broadcast
+              </button>
+            )}
+            <span style={styles.shortcutHint}>Esc to dismiss</span>
+          </div>
         </div>
 
         {/* Input row */}
@@ -208,9 +245,11 @@ export function QuickPromptBar() {
             ref={inputRef}
             style={styles.input}
             placeholder={
-              targetSession
-                ? `Send to ${targetSession.agentName}...`
-                : "No session available"
+              isBroadcast
+                ? `Broadcast to ${allSessions.length} sessions... (↑↓ history)`
+                : targetSession
+                  ? `Send to ${targetSession.agentName}... (↑↓ history)`
+                  : "No session available"
             }
             value={value}
             onChange={(e) => setValue(e.target.value)}
@@ -222,13 +261,46 @@ export function QuickPromptBar() {
               ...styles.sendButton,
               ...(canSend ? {} : styles.sendButtonDisabled),
             }}
-            onClick={canSend ? send : undefined}
+            onClick={canSend ? (isBroadcast ? broadcast : send) : undefined}
             disabled={!canSend}
             type="button"
           >
-            Send
+            {isBroadcast ? "Broadcast" : "Send"}
           </button>
         </div>
+
+        {/* Preset chips — shown when input is empty */}
+        {value.trim() === "" && targetSession && (
+          <div
+            style={{
+              display: "flex",
+              flexWrap: "wrap",
+              gap: 6,
+              padding: "6px 12px 10px",
+              borderTop: "1px solid var(--border-muted, #21262d)",
+            }}
+          >
+            {presets.map((preset) => (
+              <button
+                key={preset}
+                type="button"
+                onClick={() => applyPreset(preset)}
+                style={{
+                  fontSize: 11,
+                  padding: "3px 10px",
+                  borderRadius: 12,
+                  border: "1px solid var(--border-default, #30363d)",
+                  background: "var(--bg-surface, #1c2128)",
+                  color: "var(--text-secondary, #8b949e)",
+                  cursor: "pointer",
+                  whiteSpace: "nowrap",
+                }}
+              >
+                {preset}
+              </button>
+            ))}
+          </div>
+        )}
       </div>
     </div>
   );

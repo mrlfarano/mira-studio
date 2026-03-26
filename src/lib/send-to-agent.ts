@@ -5,8 +5,11 @@
 
 import type { KanbanCard, ContextItem } from '@/types/kanban.ts';
 import type { PtyInputMessage } from '@/types/ws-protocol';
+import { NotificationType } from '@/types/notification';
 import { WebSocketClient } from '@/lib/ws-client';
 import { useKanbanStore } from '@/store/kanban-store';
+import { useSessionStore } from '@/store/session-store';
+import { useNotificationStore } from '@/store/notification-store';
 
 // ---------------------------------------------------------------------------
 // Prompt formatting
@@ -103,10 +106,54 @@ export interface SendToAgentResult {
  * 2. Sends the prompt as PTY input to the chosen session.
  * 3. Moves the card to the "in-agent" column in the kanban store.
  */
+function notify(
+  type: NotificationType,
+  title: string,
+  message: string,
+  source: string,
+): void {
+  useNotificationStore.getState().addNotification({
+    id: `send-agent-${Date.now()}`,
+    type,
+    title,
+    message,
+    timestamp: Date.now(),
+    read: false,
+    source,
+  });
+}
+
+/**
+ * Send a kanban card to the target agent PTY session.
+ *
+ * 1. Validates the target session exists and is in a sendable state.
+ * 2. Assembles a structured prompt from the card.
+ * 3. Sends the prompt as PTY input to the chosen session.
+ * 4. Moves the card to the "in-agent" column in the kanban store.
+ * 5. Dispatches a notification on success or failure.
+ */
 export async function sendToAgent(
   card: KanbanCard,
   targetSessionId: string,
 ): Promise<SendToAgentResult> {
+  // Validate session exists and is in a usable state
+  const session = useSessionStore.getState().sessions[targetSessionId];
+  if (!session) {
+    const error = `Session "${targetSessionId}" not found`;
+    notify(NotificationType.AgentError, 'Send to Agent failed', error, 'mira');
+    return { success: false, error };
+  }
+  if (session.status === 'error') {
+    const error = `Session "${session.agentName}" is in an error state`;
+    notify(NotificationType.AgentError, 'Send to Agent failed', error, 'mira');
+    return { success: false, error };
+  }
+  if (session.status === 'done') {
+    const error = `Session "${session.agentName}" has ended`;
+    notify(NotificationType.AgentError, 'Send to Agent failed', error, 'mira');
+    return { success: false, error };
+  }
+
   try {
     const prompt = buildPrompt(card);
     await sendToPty(targetSessionId, prompt);
@@ -116,9 +163,17 @@ export async function sendToAgent(
     updateCard(card.id, { agentTarget: targetSessionId });
     moveCard(card.id, 'in-agent');
 
+    notify(
+      NotificationType.System,
+      'Sent to Agent',
+      `"${card.title}" sent to ${session.agentName}`,
+      session.agentName,
+    );
+
     return { success: true };
   } catch (err) {
     const message = err instanceof Error ? err.message : 'Unknown error';
+    notify(NotificationType.AgentError, 'Send to Agent failed', message, 'mira');
     return { success: false, error: message };
   }
 }

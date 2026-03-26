@@ -12,6 +12,13 @@ import 'react-grid-layout/css/styles.css';
 import Panel from '@/panels/Panel';
 import { CompanionPanel } from '@/panels/companion/index.ts';
 import { TerminalPanel } from '@/panels/terminal/index.ts';
+import KanbanBoard from '@/panels/kanban/KanbanBoard.tsx';
+import SIPanel from '@/panels/si/SIPanel.tsx';
+import { JournalPanel } from '@/panels/journal/index.ts';
+import McpStatusPanel from '@/components/McpStatusPanel.tsx';
+import { DeployPanel } from '@/panels/deploy/index.ts';
+import { ContextCleanerPanel } from '@/panels/context-cleaner/index.ts';
+import { VibePanel } from '@/panels/vibe/index.ts';
 import { useLayoutStore, MIN_PANEL_W, MIN_PANEL_H } from '@/store/layout-store';
 
 // ---------------------------------------------------------------------------
@@ -141,11 +148,13 @@ const LayoutEngine: React.FC = () => {
                   />
                 )}
                 {p.type === 'companion' && <CompanionPanel />}
-                {p.type === 'kanban' && (
-                  <div style={{ color: '#ccc', fontSize: '13px' }}>
-                    Kanban board placeholder
-                  </div>
-                )}
+                {p.type === 'kanban' && <KanbanBoard />}
+                {p.type === 'si' && <SIPanel />}
+                {p.type === 'journal' && <JournalPanel />}
+                {p.type === 'mcp' && <McpStatusPanel />}
+                {p.type === 'deploy' && <DeployPanel />}
+                {p.type === 'context-cleaner' && <ContextCleanerPanel />}
+                {p.type === 'vibe' && <VibePanel />}
               </Panel>
             </div>
           ))}

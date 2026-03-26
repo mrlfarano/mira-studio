@@ -43,6 +43,13 @@ interface GenerateCardsBody {
   text: string;
 }
 
+interface AnalyzeScreenshotBody {
+  /** Base64-encoded image data */
+  imageData: string;
+  /** MIME type (e.g. "image/png", "image/jpeg") */
+  mimeType: string;
+}
+
 // ---------------------------------------------------------------------------
 // Route registration
 // ---------------------------------------------------------------------------
@@ -196,6 +203,101 @@ export async function registerCompanionRoutes(
         const errorMsg =
           err instanceof Error ? err.message : "Unknown error";
         server.log.error(err, "Card generation error");
+        return reply.status(500).send({ error: errorMsg });
+      }
+    },
+  );
+
+  // -------------------------------------------------------------------------
+  // POST /api/companion/analyze-screenshot — vision LLM → kanban card
+  // -------------------------------------------------------------------------
+
+  server.post<{ Body: AnalyzeScreenshotBody }>(
+    "/api/companion/analyze-screenshot",
+    async (request, reply) => {
+      const { imageData, mimeType } = request.body;
+
+      if (!imageData || !mimeType) {
+        return reply
+          .status(400)
+          .send({ error: "imageData and mimeType are required" });
+      }
+
+      const validTypes = ["image/png", "image/jpeg", "image/gif", "image/webp"];
+      if (!validTypes.includes(mimeType)) {
+        return reply
+          .status(400)
+          .send({ error: `Unsupported image type: ${mimeType}` });
+      }
+
+      // Only Claude supports vision — verify we have the API key
+      if (!process.env.ANTHROPIC_API_KEY) {
+        return reply
+          .status(503)
+          .send({ error: "Screenshot analysis requires ANTHROPIC_API_KEY" });
+      }
+
+      try {
+        const { default: Anthropic } = await import("@anthropic-ai/sdk");
+        const client = new Anthropic();
+
+        const response = await client.messages.create({
+          model: "claude-sonnet-4-20250514",
+          max_tokens: 1024,
+          messages: [
+            {
+              role: "user",
+              content: [
+                {
+                  type: "image",
+                  source: {
+                    type: "base64",
+                    media_type: mimeType as "image/png" | "image/jpeg" | "image/gif" | "image/webp",
+                    data: imageData,
+                  },
+                },
+                {
+                  type: "text",
+                  text: `Analyze this screenshot and generate a task card for a Kanban board. Return a JSON object with these fields:
+- title: A concise task title (under 60 chars)
+- description: A detailed description of what needs to be done based on what you see
+- priority: One of "low", "medium", "high", "critical"
+
+Return ONLY the JSON object, no markdown or explanation.`,
+                },
+              ],
+            },
+          ],
+        });
+
+        const textBlock = response.content.find((c) => c.type === "text");
+        if (!textBlock || textBlock.type !== "text") {
+          return reply.status(500).send({ error: "No text response from vision model" });
+        }
+
+        // Parse the JSON response
+        const jsonMatch = textBlock.text.match(/\{[\s\S]*\}/);
+        if (!jsonMatch) {
+          return reply.status(500).send({ error: "Failed to parse card from response" });
+        }
+
+        const card = JSON.parse(jsonMatch[0]) as {
+          title: string;
+          description: string;
+          priority: string;
+        };
+
+        return {
+          card: {
+            title: card.title,
+            description: card.description,
+            priority: card.priority || "medium",
+          },
+        };
+      } catch (err: unknown) {
+        const errorMsg =
+          err instanceof Error ? err.message : "Unknown error";
+        server.log.error(err, "Screenshot analysis error");
         return reply.status(500).send({ error: errorMsg });
       }
     },

@@ -15,6 +15,7 @@ export interface PanelProps {
 const Panel: React.FC<PanelProps> = ({
   id,
   title,
+  type,
   children,
   onClose,
   onMinimize,
@@ -46,12 +47,14 @@ const Panel: React.FC<PanelProps> = ({
   return (
     <div
       className="panel"
+      data-testid={`panel-${type}`}
       style={{ zIndex, display: 'flex', flexDirection: 'column', height: '100%' }}
       onMouseDown={handleMouseDown}
     >
       {/* Header — also the drag handle (className used by react-grid-layout) */}
       <div
         className="panel-header drag-handle"
+        data-testid="panel-header"
         style={{
           display: 'flex',
           alignItems: 'center',
@@ -76,6 +79,7 @@ const Panel: React.FC<PanelProps> = ({
           <button
             onClick={handleClose}
             aria-label="Close panel"
+            data-testid="panel-close"
             style={btnStyle}
           >
             \u00d7

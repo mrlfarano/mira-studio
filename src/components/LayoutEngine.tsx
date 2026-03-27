@@ -112,7 +112,7 @@ const LayoutEngine: React.FC = () => {
   }, [setIsDragging]);
 
   return (
-    <div ref={containerRef} style={{ width: '100%', minHeight: '100vh' }}>
+    <div ref={containerRef} data-testid="layout-engine" style={{ width: '100%', minHeight: '100vh' }}>
       {mounted && (
         <ResponsiveGridLayout
           className="layout-engine"

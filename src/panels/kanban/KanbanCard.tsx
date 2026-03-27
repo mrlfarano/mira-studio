@@ -211,6 +211,7 @@ const KanbanCard: React.FC<Props> = ({ card }) => {
   return (
     <div
       data-testid="kanban-card"
+      data-card-id={card.id}
       draggable
       onDragStart={handleDragStart}
       style={{

@@ -148,9 +148,7 @@ Skills extend Mira via a manifest declaring: `cornerstones[]`, `panels[]`, `agen
 
 ### Product Scope
 
-**v1 ships:** Panel layout engine, toggle system, Mira companion, onboarding wizard, embedded PTY terminals, Kanban with Send-to-Agent, `.mira/` Git-backed config, MCP connection wizard, skill system, Workspace Scenes, command palette, theme marketplace, CSS editor, Snapshot, Build Journal.
-
-**Deferred to v1.x:** Agent Broadcast, Context Cleaner, Screenshot-to-task, Spark Canvas, Project Map, Session Replay, Vibe Score, Deploy Panel, Pair Mode, SI autonomous build agent.
+**Implemented (v0.2.0):** Panel layout engine, toggle system, Mira companion, onboarding wizard, embedded PTY terminals, Kanban with Send-to-Agent, `.mira/` Git-backed config, MCP connection wizard, skill system, Workspace Scenes, command palette, theme marketplace, CSS editor, Snapshot, Build Journal, Spark Canvas, Context Cleaner, Project Map, Session Replay, Vibe Score, Deploy Panel, Pair Mode, Observability Panel, Community Registry, SI autonomous build agent framework.
 
 **Out of scope:** File manager, code editor, mobile, enterprise SSO, billing.
 

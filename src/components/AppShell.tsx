@@ -4,6 +4,7 @@ import Sidebar from '@/components/Sidebar';
 import StatusBar from '@/components/StatusBar';
 import LayoutEngine from '@/components/LayoutEngine';
 import { QuickPromptBar } from '@/components/QuickPromptBar';
+import { CommandPalette } from '@/components/CommandPalette';
 import { useToggleStore } from '@/store/toggle-store';
 
 const AppShell: React.FC = () => {
@@ -21,6 +22,7 @@ const AppShell: React.FC = () => {
       </div>
       <StatusBar />
       <QuickPromptBar />
+      <CommandPalette />
     </div>
   );
 };

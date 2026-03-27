@@ -7,7 +7,6 @@ import { hydrateStores } from '@/store/hydrate'
 import { useAgentCardSync } from '@/hooks/useAgentCardSync'
 
 function App() {
-  const panels = useLayoutStore((s) => s.panels)
   const addPanel = useLayoutStore((s) => s.addPanel)
   const hydrated = useRef(false)
   const onboardingComplete = useOnboardingStore((s) => s.isComplete)
@@ -26,9 +25,11 @@ function App() {
 
   // Seed default panels on first mount when store is empty
   // (only if onboarding was already completed -- the wizard handles layout otherwise)
+  // Read panels.length directly from the store (not from the closure) so React Strict Mode's
+  // double-invocation doesn't bypass the guard with a stale panels=[] snapshot.
   useEffect(() => {
     if (!onboardingComplete) return
-    if (panels.length > 0) return
+    if (useLayoutStore.getState().panels.length > 0) return
 
     addPanel({
       id: 'terminal-1',
@@ -48,16 +49,6 @@ function App() {
       y: 0,
       w: 4,
       h: 4,
-    })
-
-    addPanel({
-      id: 'kanban-1',
-      type: 'kanban',
-      title: 'Kanban Board',
-      x: 0,
-      y: 4,
-      w: 10,
-      h: 3,
     })
     // Only run once on mount
     // eslint-disable-next-line react-hooks/exhaustive-deps

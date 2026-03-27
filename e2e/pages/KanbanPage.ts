@@ -33,9 +33,24 @@ export class KanbanPage {
   }
 
   async dragCardToColumn(cardTitle: string, targetColumnId: 'idea' | 'specced' | 'in-agent' | 'done') {
-    const card = this.cards().filter({ hasText: cardTitle }).first()
-    const target = this.column(targetColumnId)
-    await card.dragTo(target)
+    // Use JS drag event simulation so dataTransfer.setData/getData round-trip works reliably
+    await this.page.evaluate(
+      ({ title, colId }) => {
+        const card = Array.from(document.querySelectorAll('[data-testid="kanban-card"]')).find(
+          (el) => el.textContent?.includes(title)
+        ) as HTMLElement | undefined
+        const col = document.querySelector(`[data-testid="kanban-column-${colId}"]`) as HTMLElement | undefined
+        if (!card || !col) throw new Error(`drag target not found: card="${title}" col="${colId}"`)
+        const cardId = card.getAttribute('data-card-id') ?? ''
+        const dt = new DataTransfer()
+        dt.setData('text/plain', cardId)
+        card.dispatchEvent(new DragEvent('dragstart', { bubbles: true, cancelable: true, dataTransfer: dt }))
+        col.dispatchEvent(new DragEvent('dragover', { bubbles: true, cancelable: true, dataTransfer: dt }))
+        col.dispatchEvent(new DragEvent('drop', { bubbles: true, cancelable: true, dataTransfer: dt }))
+        card.dispatchEvent(new DragEvent('dragend', { bubbles: true, cancelable: true, dataTransfer: dt }))
+      },
+      { title: cardTitle, colId: targetColumnId }
+    )
   }
 
   async clickSendToAgent(cardTitle: string) {

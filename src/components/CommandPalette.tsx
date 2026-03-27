@@ -491,12 +491,14 @@ export function CommandPalette() {
       aria-label="Command Palette"
     >
       <div
+        data-testid="command-palette"
         style={styles.container}
         onClick={(e) => e.stopPropagation()}
         onKeyDown={handleKeyDown}
       >
         <input
           ref={inputRef}
+          data-testid="command-palette-input"
           style={styles.input}
           placeholder="Type a command..."
           value={query}
@@ -518,6 +520,7 @@ export function CommandPalette() {
                 return (
                   <div
                     key={cmd.id}
+                    data-testid="command-palette-item"
                     data-active={isActive}
                     style={styles.item(isActive)}
                     onMouseEnter={() => setActiveIndex(idx)}

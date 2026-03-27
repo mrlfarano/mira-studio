@@ -204,11 +204,12 @@ const OnboardingWizard: React.FC = () => {
   const canSkipStep = step.optional && !inputValue.trim();
 
   return (
-    <div className="onboarding-overlay">
+    <div className="onboarding-overlay" data-testid="onboarding-overlay">
       <div className="onboarding-wizard">
         {/* Skip button */}
         <button
           className="onboarding-wizard__skip"
+          data-testid="onboarding-skip"
           onClick={handleSkip}
           type="button"
         >
@@ -219,7 +220,7 @@ const OnboardingWizard: React.FC = () => {
         <ProgressDots current={currentStep} total={totalSteps} />
 
         {/* Conversational prompt */}
-        <div className="onboarding-wizard__content" key={currentStep}>
+        <div className="onboarding-wizard__content" data-testid="onboarding-step" key={currentStep}>
           <h2 className="onboarding-wizard__prompt">{step.prompt}</h2>
           <p className="onboarding-wizard__subtext">{step.subtext}</p>
 
@@ -241,6 +242,7 @@ const OnboardingWizard: React.FC = () => {
           {currentStep > 0 && (
             <button
               className="onboarding-wizard__btn onboarding-wizard__btn--back"
+              data-testid="onboarding-back"
               onClick={handleBack}
               type="button"
             >
@@ -249,6 +251,7 @@ const OnboardingWizard: React.FC = () => {
           )}
           <button
             className="onboarding-wizard__btn onboarding-wizard__btn--next"
+            data-testid="onboarding-next"
             onClick={handleNext}
             type="button"
           >

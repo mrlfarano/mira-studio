@@ -14,6 +14,7 @@ export default defineConfig({
   projects: [
     {
       name: 'chromium',
+      grepInvert: process.env.CI ? /@pty/ : undefined,
       use: { ...devices['Desktop Chrome'] },
     },
   ],
@@ -21,13 +22,13 @@ export default defineConfig({
     {
       command: 'npm run server',
       url: 'http://127.0.0.1:3001/api/health',
-      reuseExistingServer: !process.env.CI,
+      reuseExistingServer: true,
       timeout: 30000,
     },
     {
       command: 'npm run dev',
       url: 'http://localhost:5173',
-      reuseExistingServer: !process.env.CI,
+      reuseExistingServer: true,
       timeout: 30000,
     },
   ],

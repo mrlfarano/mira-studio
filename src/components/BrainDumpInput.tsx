@@ -204,6 +204,7 @@ const BrainDumpInput: React.FC<Props> = ({ open, onClose }) => {
           {phase === 'input' && (
             <>
               <textarea
+                data-testid="brain-dump-input"
                 value={text}
                 onChange={(e) => setText(e.target.value)}
                 onKeyDown={handleKeyDown}
@@ -322,6 +323,7 @@ const BrainDumpInput: React.FC<Props> = ({ open, onClose }) => {
         >
           {phase === 'input' && (
             <button
+              data-testid="brain-dump-generate"
               onClick={handleGenerate}
               disabled={!text.trim()}
               style={{
@@ -360,6 +362,7 @@ const BrainDumpInput: React.FC<Props> = ({ open, onClose }) => {
                 Back
               </button>
               <button
+                data-testid="brain-dump-confirm"
                 onClick={handleConfirm}
                 disabled={selectedIndices.size === 0}
                 style={{

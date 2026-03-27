@@ -107,6 +107,7 @@ const KanbanBoard: React.FC = () => {
 
   return (
     <div
+      data-testid="kanban-board"
       style={{ display: 'flex', flexDirection: 'column', height: '100%' }}
       onDrop={handleDrop}
       onDragOver={handleDragOver}
@@ -128,6 +129,7 @@ const KanbanBoard: React.FC = () => {
             : 'Drop screenshot or Ctrl+V to create task'}
         </span>
         <button
+          data-testid="brain-dump-trigger"
           onClick={openBrainDump}
           style={{
             background: '#5b4fcf',

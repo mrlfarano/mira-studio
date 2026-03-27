@@ -64,6 +64,7 @@ const CompanionMessage: React.FC<CompanionMessageProps> = ({ message }) => {
 
   return (
     <div
+      data-testid="companion-message"
       style={{
         display: 'flex',
         flexDirection: 'column',

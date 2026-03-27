@@ -250,6 +250,7 @@ const TerminalPanel: React.FC<TerminalPanelProps> = ({
         onCopy={handleCopy}
       />
       <div
+        data-testid="terminal-container"
         ref={containerRef}
         style={{
           flex: 1,

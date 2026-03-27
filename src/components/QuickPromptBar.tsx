@@ -242,6 +242,7 @@ export function QuickPromptBar() {
         {/* Input row */}
         <div style={styles.inputRow}>
           <input
+            data-testid="quick-prompt-input"
             ref={inputRef}
             style={styles.input}
             placeholder={

@@ -196,6 +196,7 @@ const CompanionPanel: React.FC = () => {
         }}
       >
         <input
+          data-testid="companion-input"
           ref={inputRef}
           type="text"
           value={inputValue}
@@ -214,6 +215,7 @@ const CompanionPanel: React.FC = () => {
           }}
         />
         <button
+          data-testid="companion-send"
           onClick={handleSend}
           disabled={!inputValue.trim() || isStreaming}
           aria-label="Send message"

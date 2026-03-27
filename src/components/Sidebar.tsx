@@ -34,11 +34,12 @@ const Sidebar: React.FC<SidebarProps> = ({ workspaceName }) => {
   );
 
   return (
-    <aside className={`sidebar ${collapsed ? 'sidebar--collapsed' : ''}`}>
+    <aside className={`sidebar ${collapsed ? 'sidebar--collapsed' : ''}`} data-testid="sidebar">
       <button
         className="sidebar__toggle"
         onClick={toggle}
         aria-label={collapsed ? 'Expand sidebar' : 'Collapse sidebar'}
+        data-testid="sidebar-toggle"
       >
         {collapsed ? '\u25B6' : '\u25C0'}
       </button>

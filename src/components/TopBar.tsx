@@ -8,9 +8,9 @@ export interface TopBarProps {
 
 const TopBar: React.FC<TopBarProps> = ({ workspaceName }) => {
   return (
-    <header className="topbar">
+    <header className="topbar" data-testid="topbar">
       <div className="topbar__left">
-        <span className="topbar__logo">Mira Studio</span>
+        <span className="topbar__logo" data-testid="topbar-title">Mira Studio</span>
         <span className="topbar__separator" />
         <span className="topbar__workspace">{workspaceName}</span>
         <span className="topbar__separator" />

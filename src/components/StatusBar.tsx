@@ -186,9 +186,9 @@ const StatusBar: React.FC = () => {
     : 'No ctx'
 
   return (
-    <footer className="statusbar">
+    <footer className="statusbar" data-testid="statusbar">
       <div className="statusbar__left">
-        <span className="statusbar__indicator statusbar__indicator--connection">
+        <span className="statusbar__indicator statusbar__indicator--connection" data-testid="statusbar-connection">
           <span
             className={`statusbar__dot ${connectedCount > 0 ? 'statusbar__dot--connected' : 'statusbar__dot--disconnected'}`}
           />
@@ -234,6 +234,7 @@ const StatusBar: React.FC = () => {
           <button
             onClick={openVibePanel}
             className="statusbar__indicator statusbar__indicator--vibe"
+            data-testid="statusbar-vibe-score"
             style={{
               display: 'inline-flex',
               alignItems: 'center',

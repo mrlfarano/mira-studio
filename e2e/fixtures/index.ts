@@ -10,7 +10,7 @@ export const test = base.extend<MiraFixtures>({
     await page.addInitScript(() => {
       localStorage.setItem(
         'mira-onboarding',
-        JSON.stringify({ state: { isComplete: true }, version: 0 })
+        JSON.stringify({ completed: true, updatedAt: Date.now() })
       )
     })
     await page.goto('/')
@@ -22,7 +22,7 @@ export const test = base.extend<MiraFixtures>({
     await page.addInitScript(() => {
       localStorage.setItem(
         'mira-onboarding',
-        JSON.stringify({ state: { isComplete: true }, version: 0 })
+        JSON.stringify({ completed: true, updatedAt: Date.now() })
       )
     })
     await page.goto('/')

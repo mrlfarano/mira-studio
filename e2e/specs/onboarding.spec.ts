@@ -49,15 +49,15 @@ test.describe('Onboarding Flow', () => {
     await expect(onboarding.overlay).toBeHidden()
     await shell.waitForReady()
     const stored = await page.evaluate(() => localStorage.getItem('mira-onboarding'))
-    const state = JSON.parse(stored ?? '{}') as { state: { isComplete: boolean } }
-    expect(state.state.isComplete).toBe(true)
+    const state = JSON.parse(stored ?? '{}') as { completed: boolean }
+    expect(state.completed).toBe(true)
   })
 
   test('re-visiting after completion skips wizard entirely', async ({ page }) => {
     await page.addInitScript(() => {
       localStorage.setItem(
         'mira-onboarding',
-        JSON.stringify({ state: { isComplete: true }, version: 0 })
+        JSON.stringify({ completed: true, updatedAt: Date.now() })
       )
     })
     await page.goto('/')

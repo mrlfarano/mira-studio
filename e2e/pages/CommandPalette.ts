@@ -10,7 +10,7 @@ export class CommandPalettePage {
   }
 
   async open() {
-    await this.page.keyboard.press('Meta+k')
+    await this.page.keyboard.press('ControlOrMeta+k')
     await this.palette.waitFor({ state: 'visible', timeout: 3000 })
   }
 

@@ -185,7 +185,7 @@ export function usePairMode(): UsePairModeReturn {
           const state = msg.state as Record<string, unknown>
           if (store === 'layout' && state.panels) {
             useLayoutStore.getState().setPanels(
-              state.panels as Parameters<typeof useLayoutStore.getState['setPanels']>[0],
+              state.panels as Parameters<ReturnType<typeof useLayoutStore.getState>['setPanels']>[0],
             )
           } else if (store === 'kanban') {
             // Apply kanban state — replace cards and columns
@@ -206,7 +206,7 @@ export function usePairMode(): UsePairModeReturn {
           const patch = msg.patch as Record<string, unknown>
           if (store === 'layout' && patch.panels) {
             useLayoutStore.getState().setPanels(
-              patch.panels as Parameters<typeof useLayoutStore.getState['setPanels']>[0],
+              patch.panels as Parameters<ReturnType<typeof useLayoutStore.getState>['setPanels']>[0],
             )
           } else if (store === 'kanban') {
             useKanbanStore.setState(patch as Partial<KanbanState>)

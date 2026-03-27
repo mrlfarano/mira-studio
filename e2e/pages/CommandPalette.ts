@@ -10,7 +10,12 @@ export class CommandPalettePage {
   }
 
   async open() {
-    await this.page.keyboard.press('ControlOrMeta+k')
+    // Dispatch directly to window to bypass Chromium's browser-level shortcut interception
+    await this.page.evaluate(() => {
+      window.dispatchEvent(new KeyboardEvent('keydown', {
+        key: 'k', code: 'KeyK', ctrlKey: true, bubbles: true, cancelable: true, capture: true,
+      } as KeyboardEventInit))
+    })
     await this.palette.waitFor({ state: 'visible', timeout: 3000 })
   }
 

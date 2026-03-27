@@ -27,8 +27,12 @@ export const test = base.extend<MiraFixtures>({
     })
     await page.goto('/')
     await page.waitForSelector('[data-testid="layout-engine"]', { timeout: 10000 })
-    // Open kanban via command palette
-    await page.keyboard.press('ControlOrMeta+k')
+    // Open kanban via command palette (dispatch directly to bypass browser shortcut interception)
+    await page.evaluate(() => {
+      window.dispatchEvent(new KeyboardEvent('keydown', {
+        key: 'k', code: 'KeyK', ctrlKey: true, bubbles: true, cancelable: true,
+      } as KeyboardEventInit))
+    })
     await page.waitForSelector('[data-testid="command-palette"]', { timeout: 5000 })
     await page.fill('[data-testid="command-palette-input"]', 'kanban')
     await page.keyboard.press('Enter')

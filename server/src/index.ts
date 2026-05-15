@@ -2,6 +2,7 @@ import path from "node:path";
 import fs from "node:fs/promises";
 import { fileURLToPath } from "node:url";
 import Fastify from "fastify";
+import getPort from "get-port";
 import cors from "@fastify/cors";
 import websocket from "@fastify/websocket";
 import { PtyManager } from "./pty/index.js";
@@ -250,11 +251,18 @@ const shutdown = async (signal: string) => {
 process.on("SIGINT", () => shutdown("SIGINT"));
 process.on("SIGTERM", () => shutdown("SIGTERM"));
 
-// Start server
+// Start server — picks a free port (PORT env preferred, then 3001..3003,
+// then any free). Emits a machine-readable ready line on stdout that the
+// bin/mira launcher can capture.
 const start = async () => {
   try {
-    await server.listen({ port: 3001, host: "127.0.0.1" });
-    server.log.info("Mira Studio server listening on http://127.0.0.1:3001");
+    const port = await getPort({
+      port: [Number(process.env.PORT ?? 3001), 3001, 3002, 3003, 0],
+    });
+    const host = process.env.HOST ?? "0.0.0.0";
+    await server.listen({ port, host });
+    server.log.info(`Mira Studio server listening on http://${host}:${port}`);
+    process.stdout.write(`__MIRA_READY__ http://localhost:${port}\n`);
   } catch (err) {
     server.log.error(err);
     process.exit(1);

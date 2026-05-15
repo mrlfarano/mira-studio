@@ -21,6 +21,8 @@ export interface GeneratedCard {
 
 export interface GenerateCardsResult {
   cards: GeneratedCard[];
+  degraded: boolean;
+  degradationReason?: string;
 }
 
 // ---------------------------------------------------------------------------
@@ -86,8 +88,7 @@ export async function generateCardsFromText(
   }
 
   // Parse the JSON response
-  const cards = parseCardResponse(fullResponse);
-  return { cards };
+  return parseCardResponse(fullResponse);
 }
 
 // ---------------------------------------------------------------------------
@@ -103,7 +104,18 @@ const VALID_PRIORITIES = new Set<KanbanPriority>([
 
 const VALID_CONTEXT_TYPES = new Set(["file", "url", "note"]);
 
-function parseCardResponse(response: string): GeneratedCard[] {
+const DEGRADATION_REASON = "Could not parse LLM response as JSON";
+
+function makeReviewCard(response: string): GeneratedCard {
+  return {
+    title: "Review notes",
+    description: "Could not parse structured tasks from the input.",
+    priority: "medium",
+    context: [{ type: "note", content: response.slice(0, 500) }],
+  };
+}
+
+function parseCardResponse(response: string): GenerateCardsResult {
   // Try to extract JSON array from the response, handling potential markdown fences
   let jsonStr = response.trim();
 
@@ -118,14 +130,11 @@ function parseCardResponse(response: string): GeneratedCard[] {
   const endIdx = jsonStr.lastIndexOf("]");
   if (startIdx === -1 || endIdx === -1 || endIdx <= startIdx) {
     // Fallback: return a single card with the raw text
-    return [
-      {
-        title: "Review notes",
-        description: "Could not parse structured tasks from the input.",
-        priority: "medium",
-        context: [{ type: "note", content: response.slice(0, 500) }],
-      },
-    ];
+    return {
+      cards: [makeReviewCard(response)],
+      degraded: true,
+      degradationReason: DEGRADATION_REASON,
+    };
   }
 
   jsonStr = jsonStr.slice(startIdx, endIdx + 1);
@@ -134,29 +143,33 @@ function parseCardResponse(response: string): GeneratedCard[] {
   try {
     parsed = JSON.parse(jsonStr);
   } catch {
-    return [
-      {
-        title: "Review notes",
-        description: "Could not parse structured tasks from the input.",
-        priority: "medium",
-        context: [{ type: "note", content: response.slice(0, 500) }],
-      },
-    ];
+    return {
+      cards: [makeReviewCard(response)],
+      degraded: true,
+      degradationReason: DEGRADATION_REASON,
+    };
   }
 
   if (!Array.isArray(parsed) || parsed.length === 0) {
-    return [
-      {
-        title: "Review notes",
-        description: "No tasks extracted from the input.",
-        priority: "medium",
-        context: [],
-      },
-    ];
+    return {
+      cards: [
+        {
+          title: "Review notes",
+          description: "No tasks extracted from the input.",
+          priority: "medium",
+          context: [],
+        },
+      ],
+      degraded: true,
+      degradationReason: "LLM returned no parseable task cards",
+    };
   }
 
   // Validate and normalize each card
-  return parsed.map((item: unknown) => normalizeCard(item)).filter(Boolean) as GeneratedCard[];
+  const cards = parsed
+    .map((item: unknown) => normalizeCard(item))
+    .filter(Boolean) as GeneratedCard[];
+  return { cards, degraded: false };
 }
 
 function normalizeCard(raw: unknown): GeneratedCard | null {

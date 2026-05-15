@@ -202,7 +202,11 @@ export async function registerCompanionRoutes(
 
       try {
         const result = await generateCardsFromText(engine, text);
-        return { cards: result.cards };
+        return {
+          cards: result.cards,
+          degraded: result.degraded,
+          degradationReason: result.degradationReason,
+        };
       } catch (err: unknown) {
         const errorMsg =
           err instanceof Error ? err.message : "Unknown error";

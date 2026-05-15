@@ -13,6 +13,7 @@ import { useCallback, useEffect, useRef, useState } from "react";
 import type { Terminal } from "xterm";
 import { useTerminalSocket } from "@/hooks/useTerminalSocket";
 import type { PtyStatus, PtyServerMessage } from "@/types/ws-protocol";
+import { useSessionStore } from "@/store/session-store";
 
 export interface UseTerminalOptions {
   sessionId: string;
@@ -59,6 +60,8 @@ export function useTerminal(options: UseTerminalOptions): UseTerminalReturn {
     lastMessage,
     connectionState,
   } = useTerminalSocket(sessionId);
+
+  const upsertSession = useSessionStore((s) => s.upsertSession);
 
   // ── Attach / Detach ──────────────────────────────────────────────────────
 
@@ -129,7 +132,13 @@ export function useTerminal(options: UseTerminalOptions): UseTerminalReturn {
         break;
 
       case "spawned":
-        // Shell is ready
+        upsertSession({
+          id: msg.sessionId,
+          agentName: "claude-code",
+          status: "idle",
+          startedAt: Date.now(),
+          updatedAt: Date.now(),
+        });
         break;
 
       case "error":
@@ -147,7 +156,7 @@ export function useTerminal(options: UseTerminalOptions): UseTerminalReturn {
         setAgentStatus("idle");
         break;
     }
-  }, [lastMessage, sessionId]);
+  }, [lastMessage, sessionId, upsertSession]);
 
   // ── Resize ────────────────────────────────────────────────────────────────
 

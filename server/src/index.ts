@@ -20,6 +20,7 @@ import { registerReplayRoutes } from "./replay/index.js";
 import { registerProjectMapRoutes } from "./project-map/index.js";
 import { registerRegistryRoutes } from "./registry/index.js";
 import { registerPairRoutes } from "./pair/index.js";
+import { registerStaticMount } from "./static-mount.js";
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 const PROJECT_ROOT = path.resolve(__dirname, "..", "..");
@@ -224,6 +225,11 @@ server.log.info("RegistryClient initialised");
 // Register Pair Mode routes (WebSocket relay for shared workspaces)
 registerPairRoutes(server);
 server.log.info("PairSessionManager initialised");
+
+// Register static-mount for built frontend (production / npx mode).
+// In dev mode (no dist/), this is a no-op and Vite serves the frontend.
+// Must run AFTER all route registrations and BEFORE the server listens.
+await registerStaticMount(server, PROJECT_ROOT);
 
 // Graceful shutdown: generate daily summary, kill PTY sessions, close server
 const shutdown = async (signal: string) => {

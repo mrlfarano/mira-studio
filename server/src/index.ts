@@ -21,6 +21,7 @@ import { registerReplayRoutes } from "./replay/index.js";
 import { registerProjectMapRoutes } from "./project-map/index.js";
 import { registerRegistryRoutes } from "./registry/index.js";
 import { registerPairRoutes } from "./pair/index.js";
+import { registerKeychainRoutes } from "./routes/keychain.js";
 import { registerStaticMount } from "./static-mount.js";
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
@@ -226,6 +227,10 @@ server.log.info("RegistryClient initialised");
 // Register Pair Mode routes (WebSocket relay for shared workspaces)
 registerPairRoutes(server);
 server.log.info("PairSessionManager initialised");
+
+// Register OS keychain routes (API keys never live in .mira/)
+registerKeychainRoutes(server);
+server.log.info("Keychain routes initialised");
 
 // Register static-mount for built frontend (production / npx mode).
 // In dev mode (no dist/), this is a no-op and Vite serves the frontend.

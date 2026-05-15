@@ -6,6 +6,21 @@ import { useCommandStore } from '../store/command-store'
 import { useSceneStore } from '../store/scene-store'
 import { useThemeStore } from '../store/theme-store'
 import { useOnboardingStore } from '../store/onboarding-store'
+import { NotificationType } from '../types/notification'
+
+function makeNotification(overrides: Partial<{
+  id: string; title: string; message: string; source: string;
+}> = {}) {
+  return {
+    id: overrides.id ?? `n-${Math.random().toString(36).slice(2)}`,
+    type: NotificationType.System,
+    title: overrides.title ?? 'Test',
+    message: overrides.message ?? 'Hello',
+    timestamp: Date.now(),
+    read: false,
+    source: overrides.source ?? 'test',
+  }
+}
 
 describe('Toggle Store', () => {
   beforeEach(() => useToggleStore.setState(useToggleStore.getInitialState()))
@@ -30,6 +45,7 @@ describe('Kanban Store', () => {
 
   it('adds a card', () => {
     useKanbanStore.getState().addCard({
+      id: 'card-1',
       title: 'Test Card',
       description: 'Test description',
       status: 'idea',
@@ -42,6 +58,7 @@ describe('Kanban Store', () => {
 
   it('moves a card between columns', () => {
     useKanbanStore.getState().addCard({
+      id: 'card-2',
       title: 'Move Me',
       description: '',
       status: 'idea',
@@ -55,6 +72,7 @@ describe('Kanban Store', () => {
 
   it('deletes a card', () => {
     useKanbanStore.getState().addCard({
+      id: 'card-3',
       title: 'Delete Me',
       description: '',
       status: 'idea',
@@ -77,40 +95,19 @@ describe('Notification Store', () => {
   })
 
   it('adds a notification', () => {
-    useNotificationStore.getState().addNotification({
-      type: 'system',
-      title: 'Test',
-      message: 'Hello',
-      source: 'test',
-    })
+    useNotificationStore.getState().addNotification(makeNotification())
     expect(useNotificationStore.getState().notifications).toHaveLength(1)
   })
 
   it('marks notification as read', () => {
-    useNotificationStore.getState().addNotification({
-      type: 'system',
-      title: 'Test',
-      message: 'Hello',
-      source: 'test',
-    })
-    const id = useNotificationStore.getState().notifications[0].id
-    useNotificationStore.getState().markRead(id)
+    useNotificationStore.getState().addNotification(makeNotification({ id: 'n-1' }))
+    useNotificationStore.getState().markRead('n-1')
     expect(useNotificationStore.getState().notifications[0].read).toBe(true)
   })
 
   it('clears all notifications', () => {
-    useNotificationStore.getState().addNotification({
-      type: 'system',
-      title: '1',
-      message: '',
-      source: 'test',
-    })
-    useNotificationStore.getState().addNotification({
-      type: 'system',
-      title: '2',
-      message: '',
-      source: 'test',
-    })
+    useNotificationStore.getState().addNotification(makeNotification({ title: '1' }))
+    useNotificationStore.getState().addNotification(makeNotification({ title: '2' }))
     useNotificationStore.getState().clearAll()
     expect(useNotificationStore.getState().notifications).toHaveLength(0)
   })

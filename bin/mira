@@ -1,0 +1,37 @@
+#!/usr/bin/env node
+import { spawn } from 'node:child_process'
+import { fileURLToPath } from 'node:url'
+import path from 'node:path'
+import open from 'open'
+
+const __dirname = path.dirname(fileURLToPath(import.meta.url))
+const packageRoot = path.resolve(__dirname, '..')
+const serverEntry = path.join(packageRoot, 'server', 'dist', 'index.js')
+
+const child = spawn(process.execPath, [serverEntry], {
+  cwd: process.cwd(),
+  env: { ...process.env },
+  stdio: ['ignore', 'pipe', 'inherit'],
+})
+
+let opened = false
+child.stdout.on('data', (chunk) => {
+  process.stdout.write(chunk)
+  const text = chunk.toString()
+  if (!opened) {
+    const match = text.match(/__MIRA_READY__ (\S+)/)
+    if (match) {
+      opened = true
+      open(match[1]).catch((err) => {
+        console.error('[mira] could not open browser:', err.message)
+        console.log(`[mira] open this URL manually: ${match[1]}`)
+      })
+    }
+  }
+})
+
+child.on('exit', (code) => process.exit(code ?? 0))
+
+const forward = (sig) => () => child.kill(sig)
+process.on('SIGINT', forward('SIGINT'))
+process.on('SIGTERM', forward('SIGTERM'))

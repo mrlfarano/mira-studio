@@ -78,7 +78,7 @@ export async function registerCompanionRoutes(
     ? new ClaudeAdapter()
     : new OllamaAdapter();
 
-  const engine = new CompanionEngine(defaultAdapter, companionConfig);
+  const engine = new CompanionEngine(defaultAdapter, companionConfig, projectRoot);
 
   // Reload personality when companion.yml changes
   configEngine.on("config:changed", async ({ filePath }) => {

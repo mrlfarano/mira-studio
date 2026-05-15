@@ -5,6 +5,38 @@ All notable changes to Mira Studio will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [1.0.0] - 2026-05-15
+
+First shippable release. Distribution: `npx mira-studio`.
+
+This release reconciles two parallel development tracks: the v1.x feature set
+(logged under 0.2.0) and the npx CLI distribution. v1 ships as a single-command
+`npx mira-studio` launcher.
+
+### Added
+
+- **`npx mira-studio` distribution** — `bin/mira` launcher boots the bundled server, captures the `__MIRA_READY__` stdout line, opens the browser, and forwards signals
+- **Free-port discovery** — server picks an open port via `get-port` (PORT env → 3001 → 3002 → 3003 → any free)
+- **Production static-mount** — `@fastify/static` serves the built frontend from the same port as the API, with SPA fallback for client routes
+- **OS keychain integration** — `keytar`-backed `/api/keychain/:provider` endpoints (PUT/GET/DELETE) with a provider allowlist; GET returns `{ present }` only, never the secret
+- **`.mira/memory.yml` companion context** — `CompanionEngine` reads project-local memory into the system prompt
+
+### Changed
+
+- Client WebSocket/REST URLs derive from `window.location.host`/`origin` so they follow the dynamically chosen server port (previously hardcoded `127.0.0.1:3001`)
+- `generate-cards` route forwards `degraded`/`degradationReason` so the UI can surface when LLM card parsing falls back
+
+### Fixed
+
+- Card-generator degradation was silently dropped before reaching the client
+- Pre-existing TypeScript errors in `engines.test.ts` and `pair-session.ts` that blocked a clean server build
+
+### Known issues
+
+- `@pty`-tagged E2E terminal tests fail under headless xterm rendering (CI-excluded via `grepInvert`)
+- Playwright `webServer` health-check URL is pinned to `127.0.0.1:3001`; with free-port fallback, a busy 3001 can stall the E2E harness — pin `PORT=3001` for CI
+- Server CORS allows only `http://localhost:5173`; npx mode is same-origin so unaffected, but LAN access on a dynamic port would be CORS-blocked
+
 ## [0.2.0] - 2026-03-26
 
 ### Added

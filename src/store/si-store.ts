@@ -59,7 +59,10 @@ export interface SIState {
   addLesson: (input: Pick<SILesson, 'content' | 'source' | 'cycleId'>) => Promise<void>;
 }
 
-const API_BASE = 'http://localhost:3001';
+const API_BASE =
+  typeof window !== 'undefined'
+    ? `${window.location.protocol}//${window.location.hostname}:3001`
+    : 'http://localhost:3001';
 
 // ---------------------------------------------------------------------------
 // Store

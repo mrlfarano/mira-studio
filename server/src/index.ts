@@ -21,9 +21,29 @@ const server = Fastify({
   logger: true,
 });
 
-// Register CORS for Vite dev server
+function isAllowedOrigin(origin: string): boolean {
+  try {
+    const hostname = new URL(origin).hostname;
+    return (
+      hostname === "localhost" ||
+      hostname === "127.0.0.1" ||
+      /^192\.168\.50\.\d+$/.test(hostname)
+    );
+  } catch {
+    return false;
+  }
+}
+
+// Register CORS for local dev and LAN access
 await server.register(cors, {
-  origin: "http://localhost:5173",
+  origin: (origin, cb) => {
+    if (!origin) {
+      cb(null, true);
+      return;
+    }
+
+    cb(null, isAllowedOrigin(origin));
+  },
 });
 
 // Register WebSocket support
@@ -106,8 +126,8 @@ process.on("SIGTERM", () => shutdown("SIGTERM"));
 // Start server
 const start = async () => {
   try {
-    await server.listen({ port: 3001, host: "127.0.0.1" });
-    server.log.info("Mira Studio server listening on http://127.0.0.1:3001");
+    await server.listen({ port: 3001, host: "0.0.0.0" });
+    server.log.info("Mira Studio server listening on http://0.0.0.0:3001");
   } catch (err) {
     server.log.error(err);
     process.exit(1);

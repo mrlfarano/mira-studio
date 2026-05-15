@@ -4,6 +4,9 @@ import { fileURLToPath, URL } from 'node:url'
 
 export default defineConfig({
   plugins: [react()],
+  server: {
+    host: '0.0.0.0',
+  },
   resolve: {
     alias: {
       '@/components': fileURLToPath(new URL('./src/components', import.meta.url)),

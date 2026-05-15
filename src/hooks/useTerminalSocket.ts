@@ -32,7 +32,7 @@ export interface UseTerminalSocketReturn {
 
 function buildPtyUrl(sessionId: string): string {
   const protocol = window.location.protocol === "https:" ? "wss:" : "ws:";
-  return `${protocol}//127.0.0.1:3001/ws/pty/${sessionId}`;
+  return `${protocol}//${window.location.hostname}:3001/ws/pty/${sessionId}`;
 }
 
 export function useTerminalSocket(

@@ -6,7 +6,26 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 ## Project Status
 
-**Mira Studio is pre-code.** The repository currently contains only the PRD (`PRD.md`). No implementation exists yet. When building begins, this file should be updated with build/test/lint commands and any conventions established during scaffolding.
+**Mira Studio v1.0 has shipped.** Distribution: `npx mira-studio`. See `CHANGELOG.md` for the release notes, `docs/superpowers/specs/2026-05-15-mira-studio-v1-ship-design.md` for the design that drove this cycle, and `docs/superpowers/plans/2026-05-15-mira-studio-v1-ship.md` for the implementation plan.
+
+The two-process architecture (Vite frontend + Fastify server) collapses into a single `npx mira-studio` command for end users; developers still run them as two processes.
+
+### Build/test/lint commands
+
+| Command | What it does |
+|---|---|
+| `npm run dev` | Vite dev frontend on `:5173` (proxies `/api` and `/ws` to `:3001`) |
+| `npm run server` | Fastify server on `:3001` (auto-picks free port via `get-port` if busy) |
+| `npm run build` | TS compile + Vite production build → `dist/` |
+| `npm --prefix server run build` | Server TS build → `server/dist/` |
+| `npm test` | Frontend Vitest (25 tests, 6 files) |
+| `npm --prefix server test` | Server Vitest (67 tests, 7 files) |
+| `npm run test:e2e` | Playwright canonical journey (must pass before any release) |
+| `node bin/mira` | Local equivalent of `npx mira-studio` (single command, single port) |
+| `npm run lint` | ESLint |
+| `npm run format` | Prettier write |
+
+`npm install` requires `--legacy-peer-deps` due to an `eslint@9` vs `@eslint/js@^10` peer-dep mismatch. Worth fixing in v1.1 but not blocking ship.
 
 ---
 

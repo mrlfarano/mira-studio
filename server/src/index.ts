@@ -15,6 +15,7 @@ import { registerMcpRoutes } from "./mcp/index.js";
 import { registerSnapshotRoutes } from "./snapshot/index.js";
 import { registerSIRoutes } from "./si/index.js";
 import { registerScenesRoute } from "./routes/scenes.js";
+import { registerKeychainRoutes } from "./routes/keychain.js";
 import { registerStaticMount } from "./static-mount.js";
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
@@ -109,6 +110,9 @@ server.log.info("SIEngine initialised");
 
 // Register scenes route (reads .mira/scenes.yml)
 registerScenesRoute(server, PROJECT_ROOT);
+
+// Register OS keychain routes (API keys never live in .mira/)
+registerKeychainRoutes(server);
 
 // Register static-mount for built frontend (production / npx mode).
 // In dev mode (no dist/), this is a no-op and Vite serves the frontend.

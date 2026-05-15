@@ -16,6 +16,29 @@ import { CompanionEngine } from "./companion-engine.js";
 import { ClaudeAdapter } from "./adapters/claude-adapter.js";
 import { OllamaAdapter } from "./adapters/ollama-adapter.js";
 import { generateCardsFromText } from "./card-generator.js";
+import { getApiKey } from "../keychain.js";
+
+/**
+ * Resolve the Anthropic API key.
+ *
+ * Order of preference:
+ *   1. `ANTHROPIC_API_KEY` env var (developer convenience)
+ *   2. OS keychain via keytar (`mira-studio` / `anthropic`)
+ *
+ * Returns `undefined` if no key is configured anywhere. The Anthropic SDK
+ * will then surface its own error, which propagates to the user.
+ */
+async function resolveAnthropicKey(): Promise<string | undefined> {
+  if (process.env.ANTHROPIC_API_KEY) {
+    return process.env.ANTHROPIC_API_KEY;
+  }
+  try {
+    const stored = await getApiKey("anthropic");
+    return stored ?? undefined;
+  } catch {
+    return undefined;
+  }
+}
 
 export { CompanionEngine } from "./companion-engine.js";
 export { ClaudeAdapter } from "./adapters/claude-adapter.js";
@@ -73,9 +96,11 @@ export async function registerCompanionRoutes(
     };
   }
 
-  // Select default adapter based on environment
-  const defaultAdapter: LLMAdapter = process.env.ANTHROPIC_API_KEY
-    ? new ClaudeAdapter()
+  // Select default adapter based on whether an Anthropic key is reachable
+  // (env var or OS keychain). Falls back to Ollama for fully-local use.
+  const anthropicKey = await resolveAnthropicKey();
+  const defaultAdapter: LLMAdapter = anthropicKey
+    ? new ClaudeAdapter(anthropicKey)
     : new OllamaAdapter();
 
   const engine = new CompanionEngine(defaultAdapter, companionConfig, projectRoot);
@@ -110,7 +135,8 @@ export async function registerCompanionRoutes(
       // Allow per-request adapter override
       let adapter: LLMAdapter | undefined;
       if (provider === "claude") {
-        adapter = new ClaudeAdapter();
+        const key = await resolveAnthropicKey();
+        adapter = new ClaudeAdapter(key);
       } else if (provider === "ollama") {
         adapter = new OllamaAdapter();
       }

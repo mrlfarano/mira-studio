@@ -13,6 +13,7 @@ import { registerCompanionRoutes } from "./companion/index.js";
 import { registerMcpRoutes } from "./mcp/index.js";
 import { registerSnapshotRoutes } from "./snapshot/index.js";
 import { registerSIRoutes } from "./si/index.js";
+import { registerScenesRoute } from "./routes/scenes.js";
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 const PROJECT_ROOT = path.resolve(__dirname, "..", "..");
@@ -103,6 +104,9 @@ server.log.info("SnapshotEngine initialised");
 // Register Self-Improvement (SI) engine and REST routes
 const siEngine = await registerSIRoutes(server, PROJECT_ROOT);
 server.log.info("SIEngine initialised");
+
+// Register scenes route (reads .mira/scenes.yml)
+registerScenesRoute(server, PROJECT_ROOT);
 
 // Graceful shutdown: generate daily summary, kill PTY sessions, close server
 const shutdown = async (signal: string) => {

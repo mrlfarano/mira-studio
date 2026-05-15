@@ -38,6 +38,10 @@ export const DEFAULT_MIRA_CONFIG: MiraConfig = {
   mcpConnections: [],
   telemetryOptIn: false,
   activeTheme: "default",
+  gitSync: {
+    autoCommit: true,
+    debounceMs: 5000,
+  },
 };
 
 export const DEFAULT_COMPANION_CONFIG: CompanionConfig = {

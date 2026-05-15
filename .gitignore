@@ -30,3 +30,12 @@ dist/
 # Mira Studio personal/secret files (auto-managed)
 .mira/memory.yml
 .mira/.personal/
+
+# Runtime artifacts
+.mira/journals/
+.claude/worktrees/
+agentdb.rvf
+agentdb.rvf.lock
+ruvector.db
+test-results/
+playwright-report/

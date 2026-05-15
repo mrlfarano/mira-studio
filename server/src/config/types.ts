@@ -31,6 +31,12 @@ export interface MiraConfig {
 
   /** Theme reference */
   activeTheme: string;
+
+  /** Git auto-commit settings for .mira/ changes */
+  gitSync: {
+    autoCommit: boolean;
+    debounceMs: number;
+  };
 }
 
 export interface McpConnectionPlaceholder {

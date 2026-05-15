@@ -2,7 +2,7 @@ import { describe, it, expect, beforeEach, afterEach } from 'vitest'
 import fs from 'node:fs/promises'
 import path from 'node:path'
 import os from 'node:os'
-import { ConfigEngine } from '../config/config-engine.js'
+import { ConfigEngine, DEFAULT_MIRA_CONFIG } from '../config/config-engine.js'
 
 describe('ConfigEngine', () => {
   let tmpDir: string
@@ -44,5 +44,11 @@ describe('ConfigEngine', () => {
 
   it('returns config dir path', () => {
     expect(engine.getConfigDir()).toBe(path.join(tmpDir, '.mira'))
+  })
+})
+
+describe('DEFAULT_MIRA_CONFIG', () => {
+  it('enables git auto-commit by default', () => {
+    expect(DEFAULT_MIRA_CONFIG.gitSync.autoCommit).toBe(true)
   })
 })

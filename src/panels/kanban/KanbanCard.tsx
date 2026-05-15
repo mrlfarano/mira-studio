@@ -2,6 +2,8 @@ import React, { useCallback, useMemo, useState } from 'react';
 import type { KanbanCard as KanbanCardType, KanbanPriority } from '@/types/kanban.ts';
 import { sendToAgent } from '@/lib/send-to-agent';
 import { useSessionStore } from '@/store/session-store';
+import { useNotificationStore } from '@/store/notification-store';
+import { NotificationType } from '@/types/notification';
 
 // ---------------------------------------------------------------------------
 // Priority badge colours
@@ -145,7 +147,15 @@ const KanbanCard: React.FC<Props> = ({ card }) => {
     if (card.status === 'in-agent' || card.status === 'done') return;
 
     if (activeSessions.length === 0) {
-      // No sessions — nothing to do, could show a notification in the future
+      useNotificationStore.getState().addNotification({
+        id: `kanban-no-session-${Date.now()}`,
+        type: NotificationType.System,
+        title: 'No agent session',
+        message: 'Open a terminal panel first so cards have somewhere to land.',
+        timestamp: Date.now(),
+        read: false,
+        source: 'kanban',
+      });
       return;
     }
     if (activeSessions.length === 1) {

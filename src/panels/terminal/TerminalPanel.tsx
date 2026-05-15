@@ -169,7 +169,19 @@ const TerminalPanel: React.FC<TerminalPanelProps> = ({
       // Canvas renderer is the default fallback — no action needed.
     }
 
-    fitAddon.fit();
+    // Defer the first fit() until the container has measurable dimensions.
+    // Calling fit() immediately on a 0x0 container throws inside xterm because
+    // its internal renderer hasn't computed dimensions yet.
+    const safeFit = () => {
+      const el = containerRef.current;
+      if (!el || el.clientWidth === 0 || el.clientHeight === 0) return;
+      try {
+        fitAddon.fit();
+      } catch {
+        // Renderer not ready or container hidden — next resize will retry.
+      }
+    };
+    requestAnimationFrame(safeFit);
 
     terminalRef.current = term;
     fitAddonRef.current = fitAddon;

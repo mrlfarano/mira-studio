@@ -12,6 +12,7 @@ import 'react-grid-layout/css/styles.css';
 import Panel from '@/panels/Panel';
 import { CompanionPanel } from '@/panels/companion/index.ts';
 import { TerminalPanel } from '@/panels/terminal/index.ts';
+import { JournalPanel } from '@/panels/journal/index.ts';
 import { useLayoutStore, MIN_PANEL_W, MIN_PANEL_H } from '@/store/layout-store';
 
 // ---------------------------------------------------------------------------
@@ -146,6 +147,7 @@ const LayoutEngine: React.FC = () => {
                     Kanban board placeholder
                   </div>
                 )}
+                {p.type === 'build-journal' && <JournalPanel />}
               </Panel>
             </div>
           ))}

@@ -32,7 +32,10 @@ export interface UseTerminalSocketReturn {
 
 function buildPtyUrl(sessionId: string): string {
   const protocol = window.location.protocol === "https:" ? "wss:" : "ws:";
-  return `${protocol}//${window.location.hostname}:3001/ws/pty/${sessionId}`;
+  // window.location.host includes the port. In dev mode (Vite on 5173) the
+  // /ws proxy forwards to the backend; in npx mode the server serves both
+  // UI and API on the same port (which get-port picks at boot).
+  return `${protocol}//${window.location.host}/ws/pty/${sessionId}`;
 }
 
 export function useTerminalSocket(

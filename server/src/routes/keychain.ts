@@ -11,7 +11,7 @@
  * only learns whether a key is configured.
  */
 
-import type { FastifyInstance } from "fastify";
+import type { FastifyInstance, FastifyReply } from "fastify";
 import { setApiKey, getApiKey, deleteApiKey } from "../keychain.js";
 
 interface KeychainParams {
@@ -22,11 +22,27 @@ interface KeychainBody {
   value: string;
 }
 
+const ALLOWED_PROVIDERS = new Set(["anthropic", "openai", "ollama"]);
+
+function rejectIfDisallowed(
+  provider: string,
+  reply: FastifyReply,
+): boolean {
+  if (!ALLOWED_PROVIDERS.has(provider)) {
+    reply.code(400).send({
+      error: `provider must be one of: ${[...ALLOWED_PROVIDERS].join(", ")}`,
+    });
+    return true;
+  }
+  return false;
+}
+
 export function registerKeychainRoutes(server: FastifyInstance): void {
   server.put<{ Params: KeychainParams; Body: KeychainBody }>(
     "/api/keychain/:provider",
     async (req, reply) => {
       const { provider } = req.params;
+      if (rejectIfDisallowed(provider, reply)) return;
       const value = req.body?.value;
       if (typeof value !== "string" || value.length === 0) {
         return reply
@@ -40,7 +56,8 @@ export function registerKeychainRoutes(server: FastifyInstance): void {
 
   server.get<{ Params: KeychainParams }>(
     "/api/keychain/:provider",
-    async (req) => {
+    async (req, reply) => {
+      if (rejectIfDisallowed(req.params.provider, reply)) return;
       const value = await getApiKey(req.params.provider);
       return { present: value !== null };
     },
@@ -48,7 +65,8 @@ export function registerKeychainRoutes(server: FastifyInstance): void {
 
   server.delete<{ Params: KeychainParams }>(
     "/api/keychain/:provider",
-    async (req) => {
+    async (req, reply) => {
+      if (rejectIfDisallowed(req.params.provider, reply)) return;
       const removed = await deleteApiKey(req.params.provider);
       return { removed };
     },

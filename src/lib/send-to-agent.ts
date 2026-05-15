@@ -52,7 +52,7 @@ export function buildPrompt(card: KanbanCard): string {
 
 function buildPtyUrl(sessionId: string): string {
   const protocol = window.location.protocol === 'https:' ? 'wss:' : 'ws:';
-  return `${protocol}//${window.location.hostname}:3001/ws/pty/${sessionId}`;
+  return `${protocol}//${window.location.host}/ws/pty/${sessionId}`;
 }
 
 /**

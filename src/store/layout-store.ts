@@ -1,5 +1,7 @@
 import { create } from 'zustand';
 import type { PanelConfig } from '@/types/panel';
+import { useNotificationStore } from './notification-store';
+import { NotificationType } from '@/types/notification';
 
 // ---------------------------------------------------------------------------
 // Debounced persist helper
@@ -23,8 +25,17 @@ function persistToBackend(panels: PanelConfig[]): void {
       method: 'PUT',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ layout }),
-    }).catch(() => {
-      // Silently ignore persist failures in dev
+    }).catch((err: unknown) => {
+      const msg = err instanceof Error ? err.message : 'unknown error';
+      useNotificationStore.getState().addNotification({
+        id: `layout-persist-${Date.now()}`,
+        type: NotificationType.System,
+        title: 'Layout not saved',
+        message: `Failed to persist workspace layout: ${msg}`,
+        timestamp: Date.now(),
+        read: false,
+        source: 'layout-store',
+      });
     });
   }, PERSIST_DELAY_MS);
 }

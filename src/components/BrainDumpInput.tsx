@@ -1,5 +1,7 @@
 import React, { useCallback, useState } from 'react';
 import { useKanbanStore } from '@/store/kanban-store.ts';
+import { useNotificationStore } from '@/store/notification-store.ts';
+import { NotificationType } from '@/types/notification.ts';
 import type { KanbanCard, KanbanPriority, ContextItem } from '@/types/kanban.ts';
 
 // ---------------------------------------------------------------------------
@@ -82,7 +84,24 @@ const BrainDumpInput: React.FC<Props> = ({ open, onClose }) => {
         throw new Error(errBody.error ?? `Server error ${res.status}`);
       }
 
-      const data = (await res.json()) as { cards: GeneratedCard[] };
+      const data = (await res.json()) as {
+        cards: GeneratedCard[];
+        degraded?: boolean;
+        degradationReason?: string;
+      };
+
+      if (data.degraded) {
+        useNotificationStore.getState().addNotification({
+          id: `card-gen-degraded-${Date.now()}`,
+          type: NotificationType.System,
+          title: 'Card parsing degraded',
+          message: data.degradationReason ?? 'LLM response was malformed; kept raw text',
+          timestamp: Date.now(),
+          read: false,
+          source: 'brain-dump',
+        });
+      }
+
       setGeneratedCards(data.cards);
       // Select all cards by default
       setSelectedIndices(new Set(data.cards.map((_, i) => i)));

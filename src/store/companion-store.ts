@@ -25,6 +25,7 @@ export interface CompanionState {
 
   // --- actions ---
   addMessage: (msg: CompanionMessage) => void;
+  updateMessage: (id: string, text: string) => void;
   clearMessages: () => void;
   setExpanded: (expanded: boolean) => void;
   toggleExpanded: () => void;
@@ -50,6 +51,15 @@ export const useCompanionStore = create<CompanionState>()(
           (s) => ({ messages: [...s.messages, msg] }),
           undefined,
           "companion/addMessage",
+        ),
+
+      updateMessage: (id, text) =>
+        set(
+          (s) => ({
+            messages: s.messages.map((m) => (m.id === id ? { ...m, text } : m)),
+          }),
+          undefined,
+          "companion/updateMessage",
         ),
 
       clearMessages: () =>

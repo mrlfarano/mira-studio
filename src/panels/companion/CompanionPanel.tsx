@@ -1,5 +1,6 @@
 import React, { useCallback, useRef, useEffect, useState } from 'react';
 import { useCompanionStore } from '@/store/companion-store.ts';
+import { streamCompanionReply } from '@/lib/companion-sse';
 import CompanionMessage from './CompanionMessage.tsx';
 import CompanionAvatar from './CompanionAvatar.tsx';
 
@@ -89,7 +90,7 @@ const CompanionPanel: React.FC = () => {
     messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
   }, [messages, isStreaming]);
 
-  const handleSend = useCallback(() => {
+  const handleSend = useCallback(async () => {
     const text = inputValue.trim();
     if (!text) return;
 
@@ -101,18 +102,34 @@ const CompanionPanel: React.FC = () => {
     });
 
     setInputValue('');
-
-    // Simulate streaming response (will be replaced by real WS integration)
     setIsStreaming(true);
-    setTimeout(() => {
-      addMessage({
-        id: `companion-${Date.now()}`,
-        role: 'companion',
-        text: `Got it! I'll help you with that.`,
-        timestamp: Date.now(),
-      });
+
+    const replyId = `companion-${Date.now()}`;
+    let accumulated = '';
+    // Pre-create the streaming bubble so tokens append live.
+    addMessage({
+      id: replyId,
+      role: 'companion',
+      text: '',
+      timestamp: Date.now(),
+    });
+
+    try {
+      await streamCompanionReply(
+        { message: text },
+        (chunk) => {
+          accumulated += chunk;
+          useCompanionStore.getState().updateMessage(replyId, accumulated);
+        },
+      );
+    } catch (err) {
+      useCompanionStore.getState().updateMessage(
+        replyId,
+        `[error: ${err instanceof Error ? err.message : 'companion unreachable'}]`,
+      );
+    } finally {
       setIsStreaming(false);
-    }, 1200);
+    }
   }, [inputValue, addMessage]);
 
   const handleKeyDown = useCallback(

@@ -223,6 +223,7 @@ const BrainDumpInput: React.FC<Props> = ({ open, onClose }) => {
           {phase === 'input' && (
             <>
               <textarea
+                data-testid="brain-dump-textarea"
                 value={text}
                 onChange={(e) => setText(e.target.value)}
                 onKeyDown={handleKeyDown}
@@ -274,6 +275,7 @@ const BrainDumpInput: React.FC<Props> = ({ open, onClose }) => {
                 return (
                   <div
                     key={i}
+                    data-testid="brain-dump-card-preview"
                     onClick={() => toggleCard(i)}
                     style={{
                       background: selected ? '#1e1e3a' : '#15152a',
@@ -341,6 +343,7 @@ const BrainDumpInput: React.FC<Props> = ({ open, onClose }) => {
         >
           {phase === 'input' && (
             <button
+              data-testid="brain-dump-generate"
               onClick={handleGenerate}
               disabled={!text.trim()}
               style={{
@@ -379,6 +382,7 @@ const BrainDumpInput: React.FC<Props> = ({ open, onClose }) => {
                 Back
               </button>
               <button
+                data-testid="brain-dump-confirm"
                 onClick={handleConfirm}
                 disabled={selectedIndices.size === 0}
                 style={{

@@ -38,6 +38,7 @@ const KanbanBoard: React.FC = () => {
         }}
       >
         <button
+          data-testid="brain-dump-open"
           onClick={openBrainDump}
           style={{
             background: '#5b4fcf',

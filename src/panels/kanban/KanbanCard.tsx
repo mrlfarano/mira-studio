@@ -196,6 +196,9 @@ const KanbanCard: React.FC<Props> = ({ card }) => {
 
   return (
     <div
+      data-testid="kanban-card"
+      data-card-id={card.id}
+      data-card-status={card.status}
       draggable
       onDragStart={handleDragStart}
       style={{
@@ -261,6 +264,7 @@ const KanbanCard: React.FC<Props> = ({ card }) => {
         </span>
 
         <button
+          data-testid="kanban-send-to-agent"
           disabled={disabled}
           style={{
             fontSize: 11,

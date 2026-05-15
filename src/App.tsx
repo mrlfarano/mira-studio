@@ -56,8 +56,18 @@ function App() {
       title: 'Kanban Board',
       x: 0,
       y: 4,
-      w: 10,
-      h: 3,
+      w: 7,
+      h: 4,
+    })
+
+    addPanel({
+      id: 'journal-1',
+      type: 'build-journal',
+      title: 'Build Journal',
+      x: 7,
+      y: 4,
+      w: 5,
+      h: 4,
     })
     // Only run once on mount
     // eslint-disable-next-line react-hooks/exhaustive-deps

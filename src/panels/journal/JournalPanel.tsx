@@ -115,6 +115,7 @@ const JournalPanel: React.FC = () => {
 
   return (
     <div
+      data-panel="build-journal"
       style={{
         display: 'flex',
         flexDirection: 'column',

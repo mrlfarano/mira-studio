@@ -13,6 +13,7 @@ import Panel from '@/panels/Panel';
 import { CompanionPanel } from '@/panels/companion/index.ts';
 import { TerminalPanel } from '@/panels/terminal/index.ts';
 import { JournalPanel } from '@/panels/journal/index.ts';
+import KanbanBoard from '@/panels/kanban/KanbanBoard.tsx';
 import { useLayoutStore, MIN_PANEL_W, MIN_PANEL_H } from '@/store/layout-store';
 
 // ---------------------------------------------------------------------------
@@ -142,11 +143,7 @@ const LayoutEngine: React.FC = () => {
                   />
                 )}
                 {p.type === 'companion' && <CompanionPanel />}
-                {p.type === 'kanban' && (
-                  <div style={{ color: '#ccc', fontSize: '13px' }}>
-                    Kanban board placeholder
-                  </div>
-                )}
+                {p.type === 'kanban' && <KanbanBoard />}
                 {p.type === 'build-journal' && <JournalPanel />}
               </Panel>
             </div>

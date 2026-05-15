@@ -34,6 +34,7 @@ const KanbanColumn: React.FC<Props> = ({ columnId, title, cards }) => {
 
   return (
     <div
+      data-column={columnId}
       onDragOver={handleDragOver}
       onDrop={handleDrop}
       style={{

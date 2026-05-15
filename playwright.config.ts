@@ -20,15 +20,15 @@ export default defineConfig({
   webServer: [
     {
       command: 'npm run server',
-      url: 'http://127.0.0.1:3001/api/health',
+      port: 3001,
       reuseExistingServer: !process.env.CI,
-      timeout: 30000,
+      timeout: 60_000,
     },
     {
       command: 'npm run dev',
-      url: 'http://localhost:5173',
+      port: 5173,
       reuseExistingServer: !process.env.CI,
-      timeout: 30000,
+      timeout: 60_000,
     },
   ],
 })

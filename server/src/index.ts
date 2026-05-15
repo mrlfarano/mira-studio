@@ -14,6 +14,7 @@ import { registerMcpRoutes } from "./mcp/index.js";
 import { registerSnapshotRoutes } from "./snapshot/index.js";
 import { registerSIRoutes } from "./si/index.js";
 import { registerScenesRoute } from "./routes/scenes.js";
+import { registerStaticMount } from "./static-mount.js";
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 const PROJECT_ROOT = path.resolve(__dirname, "..", "..");
@@ -107,6 +108,10 @@ server.log.info("SIEngine initialised");
 
 // Register scenes route (reads .mira/scenes.yml)
 registerScenesRoute(server, PROJECT_ROOT);
+
+// Register static-mount for built frontend (production / npx mode).
+// In dev mode (no dist/), this is a no-op and Vite serves the frontend.
+await registerStaticMount(server, PROJECT_ROOT);
 
 // Graceful shutdown: generate daily summary, kill PTY sessions, close server
 const shutdown = async (signal: string) => {

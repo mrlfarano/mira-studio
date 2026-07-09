@@ -3,9 +3,10 @@
  * for the Session Replay feature.
  *
  * Routes:
- *   GET    /api/replay/sessions    -- list all recordings with metadata
- *   GET    /api/replay/:sessionId  -- full recording data for a session
- *   DELETE /api/replay/:sessionId  -- clear a recording
+ *   GET    /api/replay/sessions           -- list all recordings with metadata
+ *   GET    /api/replay/:sessionId         -- full recording data for a session
+ *   GET    /api/replay/:sessionId/export  -- export recording as downloadable JSON
+ *   DELETE /api/replay/:sessionId         -- clear a recording
  */
 
 import type { FastifyInstance } from 'fastify'
@@ -42,9 +43,33 @@ export function registerReplayRoutes(
       const { sessionId } = request.params
       const recording = engine.getRecording(sessionId)
       if (!recording) {
-        return reply.status(404).send({ error: `Recording not found: ${sessionId}` })
+        return reply
+          .status(404)
+          .send({ error: `Recording not found: ${sessionId}` })
       }
       return recording
+    },
+  )
+
+  // -------------------------------------------------------------------------
+  // GET /api/replay/:sessionId/export -- export as downloadable JSON file
+  // -------------------------------------------------------------------------
+  server.get<{ Params: { sessionId: string } }>(
+    '/api/replay/:sessionId/export',
+    async (request, reply) => {
+      const { sessionId } = request.params
+      const exported = engine.exportRecording(sessionId)
+      if (!exported) {
+        return reply
+          .status(404)
+          .send({ error: `Recording not found: ${sessionId}` })
+      }
+      reply.header('Content-Type', 'application/json')
+      reply.header(
+        'Content-Disposition',
+        `attachment; filename="${exported.filename}"`,
+      )
+      return exported.data
     },
   )
 

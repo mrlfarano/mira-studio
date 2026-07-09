@@ -8,16 +8,16 @@
 
 export interface LLMAdapterOptions {
   /** Model identifier (e.g. "claude-sonnet-4-20250514", "llama3") */
-  model?: string;
+  model?: string
 
   /** Maximum tokens to generate */
-  maxTokens?: number;
+  maxTokens?: number
 
   /** Temperature (0-1) */
-  temperature?: number;
+  temperature?: number
 
   /** Optional stop sequences */
-  stopSequences?: string[];
+  stopSequences?: string[]
 }
 
 /**
@@ -25,24 +25,24 @@ export interface LLMAdapterOptions {
  * `chat` returns an async generator that yields text chunks for streaming.
  */
 export interface LLMAdapter {
-  readonly name: string;
+  readonly name: string
 
   /** Stream a chat completion. Yields incremental text deltas. */
   chat(
     messages: CompanionMessage[],
     options?: LLMAdapterOptions,
-  ): AsyncGenerator<string>;
+  ): AsyncGenerator<string>
 }
 
 // ---------------------------------------------------------------------------
 // Message types
 // ---------------------------------------------------------------------------
 
-export type CompanionRole = "system" | "user" | "assistant";
+export type CompanionRole = 'system' | 'user' | 'assistant'
 
 export interface CompanionMessage {
-  role: CompanionRole;
-  content: string;
+  role: CompanionRole
+  content: string
 }
 
 // ---------------------------------------------------------------------------
@@ -51,36 +51,40 @@ export interface CompanionMessage {
 
 export interface CompanionContext {
   /** Current workspace name */
-  workspace?: string;
+  workspace?: string
 
   /** Active file path (relative to project root) */
-  activeFile?: string;
+  activeFile?: string
 
   /** Recent terminal output (last N lines) */
-  terminalHistory?: string[];
+  terminalHistory?: string[]
 
   /** Currently installed skill names */
-  installedSkills?: string[];
+  installedSkills?: string[]
 
   /** Git branch */
-  gitBranch?: string;
+  gitBranch?: string
 
   /** Arbitrary key-value metadata from the UI */
-  metadata?: Record<string, unknown>;
+  metadata?: Record<string, unknown>
 }
 
 // ---------------------------------------------------------------------------
 // Action suggestions parsed from LLM responses
 // ---------------------------------------------------------------------------
 
-export type ActionSuggestionType = "config_change" | "skill_install" | "command";
+export type ActionSuggestionType =
+  | 'config_change'
+  | 'skill_install'
+  | 'skill_create'
+  | 'command'
 
 export interface ActionSuggestion {
-  type: ActionSuggestionType;
+  type: ActionSuggestionType
   /** Human-readable description */
-  description: string;
+  description: string
   /** Machine-readable payload */
-  payload: Record<string, unknown>;
+  payload: Record<string, unknown>
 }
 
 // ---------------------------------------------------------------------------
@@ -89,13 +93,13 @@ export interface ActionSuggestion {
 
 export interface CompanionSession {
   /** Unique session ID */
-  id: string;
+  id: string
   /** Conversation history */
-  messages: CompanionMessage[];
+  messages: CompanionMessage[]
   /** Current context snapshot */
-  context: CompanionContext;
+  context: CompanionContext
   /** Parsed action suggestions from the latest assistant turn */
-  pendingActions: ActionSuggestion[];
+  pendingActions: ActionSuggestion[]
   /** Timestamp of last activity */
-  lastActivity: number;
+  lastActivity: number
 }

@@ -10,15 +10,15 @@
 // ---------------------------------------------------------------------------
 
 export interface SIHypothesis {
-  id: string;
-  title: string;
-  description: string;
+  id: string
+  title: string
+  description: string
   /** Expected impact: low | medium | high */
-  impact: "low" | "medium" | "high";
+  impact: 'low' | 'medium' | 'high'
   /** Lifecycle status */
-  status: "queued" | "testing" | "accepted" | "rejected";
+  status: 'queued' | 'testing' | 'accepted' | 'rejected'
   /** ISO date when the hypothesis was created */
-  createdAt: string;
+  createdAt: string
 }
 
 // ---------------------------------------------------------------------------
@@ -26,14 +26,14 @@ export interface SIHypothesis {
 // ---------------------------------------------------------------------------
 
 export interface SILesson {
-  id: string;
-  content: string;
+  id: string
+  content: string
   /** Who/what contributed this lesson */
-  source: "mira" | "agent" | "user";
+  source: 'mira' | 'agent' | 'user'
   /** ISO date */
-  date: string;
+  date: string
   /** Optional link to a specific build cycle */
-  cycleId?: string;
+  cycleId?: string
 }
 
 // ---------------------------------------------------------------------------
@@ -41,19 +41,19 @@ export interface SILesson {
 // ---------------------------------------------------------------------------
 
 export interface SIBuild {
-  id: string;
+  id: string
   /** ISO date */
-  date: string;
+  date: string
   /** Git branch (if applicable) */
-  branch: string;
+  branch: string
   /** Hypothesis being tested (ID reference) */
-  hypothesis: string;
+  hypothesis: string
   /** Free-text outcome description */
-  outcome: string;
+  outcome: string
   /** Summary of test results */
-  testResults: string;
+  testResults: string
   /** Whether the build outcome was accepted as an improvement */
-  accepted: boolean;
+  accepted: boolean
 }
 
 // ---------------------------------------------------------------------------
@@ -62,10 +62,10 @@ export interface SIBuild {
 
 export interface ProjectSI {
   /** How often SI cycles run: daily | weekly | per-build */
-  cadence: "daily" | "weekly" | "per-build";
-  hypotheses: SIHypothesis[];
-  lessons: SILesson[];
-  builds: SIBuild[];
+  cadence: 'daily' | 'weekly' | 'per-build'
+  hypotheses: SIHypothesis[]
+  lessons: SILesson[]
+  builds: SIBuild[]
 }
 
 // ---------------------------------------------------------------------------
@@ -74,13 +74,67 @@ export interface ProjectSI {
 
 export interface SIHealth {
   /** Overall health score 0-100 */
-  score: number;
+  score: number
   /** Number of builds in last 7 days */
-  recentBuilds: number;
+  recentBuilds: number
   /** Acceptance rate of recent builds (0-1) */
-  acceptanceRate: number;
+  acceptanceRate: number
   /** Days since last SI activity */
-  daysSinceLastActivity: number;
+  daysSinceLastActivity: number
   /** Number of queued hypotheses */
-  queuedHypotheses: number;
+  queuedHypotheses: number
+}
+
+// ---------------------------------------------------------------------------
+// UserSI — cross-project developer growth profile (~/.mira/user_SI.yml)
+// ---------------------------------------------------------------------------
+
+export interface UserSI {
+  /** Schema version */
+  version: number
+  /** Cross-project lessons carried across all workspaces */
+  crossProjectLessons: UserSILesson[]
+  /** Skills the developer has practiced across projects */
+  skillsDeveloped: UserSISkill[]
+  /** Per-project summary snapshots */
+  projectSnapshots: UserSIProjectSnapshot[]
+  /** Aggregated developer growth metrics */
+  growthMetrics: UserGrowthMetrics
+  /** ISO date of last sync */
+  lastSyncedAt: string
+}
+
+export interface UserSILesson {
+  id: string
+  content: string
+  sourceProject: string
+  date: string
+  category: string
+}
+
+export interface UserSISkill {
+  name: string
+  level: 'beginner' | 'intermediate' | 'advanced' | 'expert'
+  projects: string[]
+  firstSeen: string
+  lastPracticed: string
+}
+
+export interface UserSIProjectSnapshot {
+  projectName: string
+  projectPath: string
+  lastSyncedAt: string
+  totalBuilds: number
+  acceptanceRate: number
+  activeHypotheses: number
+}
+
+export interface UserGrowthMetrics {
+  totalProjectsWorked: number
+  totalBuildsAcrossProjects: number
+  averageAcceptanceRate: number
+  totalLessonsLearned: number
+  longestStreakDays: number
+  currentStreakDays: number
+  skillsCount: number
 }

@@ -58,13 +58,39 @@ const SAMPLE_ENTRIES: RegistryEntry[] = [
     name: 'BMAD Workflow',
     description:
       'Opinionated BMAD Method layout with companion, journal, and SI panel for iterative delivery.',
-    author: 'bmad-contrib',
-    category: 'workflow',
+    author: 'mira-team',
+    category: 'skill',
     stars: 87,
     configUrl:
-      'https://raw.githubusercontent.com/mrlfarano/mira-registry/main/configs/bmad-workflow.json',
-    version: '1.2.0',
-    tags: ['bmad', 'agile', 'methodology', 'planning'],
+      'https://raw.githubusercontent.com/mrlfarano/mira-registry/main/skills/bmad-workflow.json',
+    version: '1.0.0',
+    tags: ['bmad', 'agile', 'methodology', 'planning', 'cornerstone'],
+  },
+  {
+    id: 'taskmaster-ai',
+    name: 'TaskMaster AI',
+    description:
+      'AI-powered task management with automatic decomposition, dependency tracking, and intelligent prioritization.',
+    author: 'mira-team',
+    category: 'skill',
+    stars: 156,
+    configUrl:
+      'https://raw.githubusercontent.com/mrlfarano/mira-registry/main/skills/taskmaster-ai.json',
+    version: '1.0.0',
+    tags: ['tasks', 'kanban', 'decomposition', 'ai', 'cornerstone'],
+  },
+  {
+    id: 'claude-superpowers',
+    name: 'Claude Superpowers',
+    description:
+      'Advanced Claude capabilities: system prompt templates, multi-model routing, context management, and agent optimizations.',
+    author: 'mira-team',
+    category: 'skill',
+    stars: 214,
+    configUrl:
+      'https://raw.githubusercontent.com/mrlfarano/mira-registry/main/skills/claude-superpowers.json',
+    version: '1.0.0',
+    tags: ['claude', 'ai', 'enhanced', 'coding', 'cornerstone'],
   },
   {
     id: 'minimal-terminal',
@@ -158,7 +184,10 @@ export class RegistryClient {
    * relative file paths (e.g. "workspaces/default.yml") and values are
    * the file contents as strings.
    */
-  async install(id: string, configDir: string): Promise<{ ok: true; id: string }> {
+  async install(
+    id: string,
+    configDir: string,
+  ): Promise<{ ok: true; id: string }> {
     const entry = await this.getEntry(id)
     if (!entry) {
       throw new Error(`Registry entry "${id}" not found`)

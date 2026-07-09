@@ -1,0 +1,88 @@
+id: bmad-workflow
+name: BMAD Workflow
+version: 1.0.0
+description: >-
+  Opinionated BMAD Method layout with companion, journal, and SI panel for
+  iterative delivery. Provides structured project delivery planning with
+  build-measure-analyze-decide cycles.
+author: mira-team
+homepage: https://github.com/mrlfarano/mira-studio
+cornerstones:
+  - project-delivery-planning
+  - observability-reiteration
+  - self-improvement
+panels:
+  - type: companion
+    title: BMAD Coach
+    defaultWidth: 4
+    defaultHeight: 4
+  - type: journal
+    title: Build Journal
+    defaultWidth: 3
+    defaultHeight: 4
+  - type: si
+    title: SI Cycle Tracker
+    defaultWidth: 3
+    defaultHeight: 4
+  - type: kanban
+    title: BMAD Kanban
+    defaultWidth: 6
+    defaultHeight: 4
+agent_injections:
+  - trigger: on_start
+    content: >-
+      You are working within the BMAD Method framework. Focus on iterative
+      delivery: Build small increments, Measure outcomes, Analyze results,
+      and Decide next steps. Always tie code changes to a hypothesis.
+  - trigger: on_prompt
+    content: >-
+      Before implementing, consider: What hypothesis does this serve?
+      How will we measure success? What is the smallest useful increment?
+claude_md_additions:
+  - section: BMAD Method
+    content: >-
+      This project uses the BMAD (Build-Measure-Analyze-Decide) Method.
+      Every feature should have a clear hypothesis, measurable outcome,
+      and minimal viable implementation. Use the SI panel to track cycles.
+wizard_steps:
+  - id: bmad-team-size
+    prompt: 'What is your team size?'
+    inputType: select
+    options:
+      - 'Solo (1)'
+      - 'Small (2-4)'
+      - 'Medium (5-10)'
+    defaultValue: 'Solo (1)'
+  - id: bmad-cycle-length
+    prompt: 'Preferred cycle length?'
+    inputType: select
+    options:
+      - 'Daily'
+      - 'Weekly'
+      - 'Per-build'
+    defaultValue: 'Per-build'
+  - id: bmad-metrics
+    prompt: 'What metrics matter most?'
+    inputType: multi-select
+    options:
+      - 'Build success rate'
+      - 'Test coverage'
+      - 'Time to deploy'
+      - 'Bug count'
+keybindings:
+  - action: bmad.new-cycle
+    keys: 'Ctrl+Shift+B'
+    description: Start a new BMAD cycle
+  - action: bmad.log-outcome
+    keys: 'Ctrl+Shift+L'
+    description: Log build outcome
+permissions:
+  - panels
+  - kanban
+  - journal
+  - build_journal
+  - companion
+  - config
+composes_with:
+  - taskmaster-ai
+conflicts_with: []

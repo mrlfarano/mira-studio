@@ -1,0 +1,80 @@
+id: claude-superpowers
+name: Claude Superpowers
+version: 1.0.0
+description: >-
+  Unlock advanced Claude capabilities in Mira. Adds system prompt templates,
+  multi-model routing, context window management, and Claude-specific
+  agent optimizations for maximum coding velocity.
+author: mira-team
+homepage: https://github.com/mrlfarano/mira-studio
+cornerstones:
+  - vibe-code-building
+  - creativity-ideation
+panels:
+  - type: companion
+    title: Claude Power Panel
+    defaultWidth: 4
+    defaultHeight: 6
+agent_injections:
+  - trigger: always
+    content: >-
+      Claude Superpowers is active. Use extended thinking for complex
+      problems. Leverage multi-file context when making changes. Always
+      consider the full project context before suggesting modifications.
+  - trigger: on_start
+    content: >-
+      You have enhanced capabilities: multi-file analysis, architecture
+      reasoning, test generation, and performance profiling. Use these
+      proactively. When uncertain, ask for clarification rather than
+      making assumptions.
+claude_md_additions:
+  - section: Claude Superpowers
+    content: >-
+      This project uses Claude Superpowers for enhanced AI-assisted
+      development. Claude has access to full project context and can
+      perform multi-file analysis, generate tests, and suggest
+      architectural improvements.
+wizard_steps:
+  - id: cs-model-preference
+    prompt: 'Preferred Claude model?'
+    inputType: select
+    options:
+      - 'claude-sonnet-4 (balanced)'
+      - 'claude-opus-4 (powerful)'
+      - 'claude-haiku (fast)'
+    defaultValue: 'claude-sonnet-4 (balanced)'
+  - id: cs-auto-test
+    prompt: 'Auto-generate tests for new code?'
+    inputType: confirm
+    defaultValue: 'true'
+  - id: cs-review-level
+    prompt: 'Code review strictness?'
+    inputType: select
+    options:
+      - 'Thorough (all changes)'
+      - 'Moderate (significant changes)'
+      - 'Light (only critical paths)'
+    defaultValue: 'Moderate (significant changes)'
+keybindings:
+  - action: claude.analyze
+    keys: 'Ctrl+Shift+C'
+    description: Deep codebase analysis
+  - action: claude.generate-tests
+    keys: 'Ctrl+Shift+T'
+    description: Generate tests for current file
+  - action: claude.refactor
+    keys: 'Ctrl+Shift+R'
+    description: Refactor suggestion
+permissions:
+  - panels
+  - companion
+  - agent_context
+  - config
+  - kanban
+  - journal
+  - workspace
+  - build_journal
+composes_with:
+  - bmad-workflow
+  - taskmaster-ai
+conflicts_with: []

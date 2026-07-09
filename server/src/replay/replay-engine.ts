@@ -97,6 +97,36 @@ export class ReplayEngine {
     this.recordings.delete(sessionId)
   }
 
+  exportRecording(
+    sessionId: string,
+  ): { data: string; filename: string } | null {
+    const rec = this.recordings.get(sessionId)
+    if (!rec) return null
+
+    const lastTs =
+      rec.entries.length > 0
+        ? rec.entries[rec.entries.length - 1].timestamp
+        : rec.startedAt
+
+    const exportData = {
+      version: 1,
+      miraStudio: true,
+      sessionId,
+      startedAt: rec.startedAt,
+      duration: lastTs - rec.startedAt,
+      exportedAt: new Date().toISOString(),
+      entries: rec.entries,
+    }
+
+    const dateStr = new Date(rec.startedAt).toISOString().replace(/[:.]/g, '-')
+    const filename = `mira-replay-${sessionId.slice(0, 8)}-${dateStr}.json`
+
+    return {
+      data: JSON.stringify(exportData, null, 2),
+      filename,
+    }
+  }
+
   // ── Internals ───────────────────────────────────────────────────────────
 
   private attachListeners(): void {

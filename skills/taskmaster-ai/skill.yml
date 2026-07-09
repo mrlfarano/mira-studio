@@ -1,0 +1,80 @@
+id: taskmaster-ai
+name: TaskMaster AI
+version: 1.0.0
+description: >-
+  AI-powered task management with automatic decomposition, dependency
+  tracking, and intelligent prioritization. Transforms brain dumps into
+  structured, actionable task hierarchies.
+author: mira-team
+homepage: https://github.com/mrlfarano/mira-studio
+cornerstones:
+  - project-delivery-planning
+  - creativity-ideation
+panels:
+  - type: kanban
+    title: TaskMaster Board
+    defaultWidth: 6
+    defaultHeight: 6
+  - type: companion
+    title: Task Decomposer
+    defaultWidth: 4
+    defaultHeight: 6
+agent_injections:
+  - trigger: on_start
+    content: >-
+      TaskMaster AI is active. When you encounter a large task, offer to
+      decompose it into smaller subtasks. Track dependencies between tasks
+      and suggest optimal execution order.
+  - trigger: on_prompt
+    content: >-
+      Consider breaking this task down: What are the subtasks? Are there
+      dependencies? What is the critical path? Suggest the smallest
+      deliverable first.
+claude_md_additions:
+  - section: TaskMaster AI
+    content: >-
+      TaskMaster AI provides intelligent task decomposition. Use the
+      companion to break down complex tasks. The Kanban board tracks
+      task status and dependencies automatically.
+wizard_steps:
+  - id: tm-methodology
+    prompt: 'Which task methodology do you prefer?'
+    inputType: select
+    options:
+      - 'Kanban'
+      - 'Scrum-like sprints'
+      - 'Getting Things Done'
+      - 'Freeform'
+    defaultValue: 'Kanban'
+  - id: tm-auto-decompose
+    prompt: 'Auto-decompose large tasks?'
+    inputType: confirm
+    defaultValue: 'true'
+  - id: tm-priority-scheme
+    prompt: 'Priority scheme?'
+    inputType: select
+    options:
+      - "MoSCoW (Must/Should/Could/Won't)"
+      - 'Numeric (1-5)'
+      - 'P0/P1/P2/P3'
+    defaultValue: 'P0/P1/P2/P3'
+keybindings:
+  - action: taskmaster.decompose
+    keys: 'Ctrl+Shift+D'
+    description: Decompose selected task
+  - action: taskmaster.next
+    keys: 'Ctrl+Shift+N'
+    description: Show next recommended task
+  - action: taskmaster.send-to-agent
+    keys: 'Ctrl+Shift+A'
+    description: Send task to active agent
+permissions:
+  - panels
+  - kanban
+  - companion
+  - agent_context
+  - workspace
+composes_with:
+  - bmad-workflow
+  - claude-superpowers
+conflicts_with: []

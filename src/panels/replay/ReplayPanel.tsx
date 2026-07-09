@@ -186,7 +186,9 @@ const ReplayPanel: React.FC = () => {
     }
 
     void poll()
-    const interval = setInterval(() => { void poll() }, 5000)
+    const interval = setInterval(() => {
+      void poll()
+    }, 5000)
 
     return () => {
       cancelled = true
@@ -350,13 +352,38 @@ const ReplayPanel: React.FC = () => {
     [],
   )
 
+  const handleExport = useCallback(
+    async (sessionId: string, e: React.MouseEvent) => {
+      e.stopPropagation()
+      try {
+        const res = await fetch(`${API_BASE}/api/replay/${sessionId}/export`)
+        if (!res.ok) return
+        const blob = await res.blob()
+        const disposition = res.headers.get('Content-Disposition') ?? ''
+        const match = disposition.match(/filename="(.+?)"/)
+        const filename = match?.[1] ?? `mira-replay-${sessionId}.json`
+        const url = URL.createObjectURL(blob)
+        const a = document.createElement('a')
+        a.href = url
+        a.download = filename
+        a.click()
+        URL.revokeObjectURL(url)
+      } catch {
+        // Export failed silently
+      }
+    },
+    [],
+  )
+
   // ── Render: List view ───────────────────────────────────────────────────
 
   if (view === 'list') {
     return (
       <div style={styles.container}>
         <div style={styles.toolbar}>
-          <span style={{ fontWeight: 600, fontSize: 13 }}>Session Recordings</span>
+          <span style={{ fontWeight: 600, fontSize: 13 }}>
+            Session Recordings
+          </span>
           <span style={{ fontSize: 11, color: '#6e7681' }}>
             {sessions.length} recording{sessions.length !== 1 ? 's' : ''}
           </span>
@@ -371,27 +398,49 @@ const ReplayPanel: React.FC = () => {
             <div
               key={s.sessionId}
               style={styles.listItem}
-              onClick={() => { void loadRecording(s.sessionId) }}
+              onClick={() => {
+                void loadRecording(s.sessionId)
+              }}
               onMouseEnter={(e) => {
-                (e.currentTarget as HTMLDivElement).style.borderColor = '#58a6ff'
+                ;(e.currentTarget as HTMLDivElement).style.borderColor =
+                  '#58a6ff'
               }}
               onMouseLeave={(e) => {
-                (e.currentTarget as HTMLDivElement).style.borderColor = '#333'
+                ;(e.currentTarget as HTMLDivElement).style.borderColor = '#333'
               }}
             >
-              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+              <div
+                style={{
+                  display: 'flex',
+                  justifyContent: 'space-between',
+                  alignItems: 'center',
+                }}
+              >
                 <div style={styles.listItemLabel}>
                   {s.sessionId.length > 24
                     ? `${s.sessionId.slice(0, 24)}...`
                     : s.sessionId}
                 </div>
-                <button
-                  style={{ ...styles.btn, fontSize: 11, padding: '1px 6px' }}
-                  onClick={(e) => { void handleDelete(s.sessionId, e) }}
-                  title="Delete recording"
-                >
-                  Delete
-                </button>
+                <div style={{ display: 'flex', gap: '4px' }}>
+                  <button
+                    style={{ ...styles.btn, fontSize: 11, padding: '1px 6px' }}
+                    onClick={(e) => {
+                      void handleExport(s.sessionId, e)
+                    }}
+                    title="Export recording"
+                  >
+                    Export
+                  </button>
+                  <button
+                    style={{ ...styles.btn, fontSize: 11, padding: '1px 6px' }}
+                    onClick={(e) => {
+                      void handleDelete(s.sessionId, e)
+                    }}
+                    title="Delete recording"
+                  >
+                    Delete
+                  </button>
+                </div>
               </div>
               <div style={styles.listItemMeta}>
                 Started {formatTime(s.startedAt)} | Duration{' '}
@@ -414,10 +463,26 @@ const ReplayPanel: React.FC = () => {
         <button style={styles.btn} onClick={handleBack}>
           Back to list
         </button>
-        <span style={{ fontSize: 12, color: '#6e7681', flex: 1, textAlign: 'center' }}>
+        <span
+          style={{
+            fontSize: 12,
+            color: '#6e7681',
+            flex: 1,
+            textAlign: 'center',
+          }}
+        >
           {activeSessionId}
         </span>
         <div style={{ display: 'flex', gap: '4px' }}>
+          <button
+            style={styles.btn}
+            onClick={(e) => {
+              void handleExport(activeSessionId!, e)
+            }}
+            title="Export recording"
+          >
+            Export
+          </button>
           {([1, 2, 4] as const).map((s) => (
             <button
               key={s}
@@ -435,10 +500,7 @@ const ReplayPanel: React.FC = () => {
       </pre>
 
       <div style={styles.controls}>
-        <button
-          style={styles.btn}
-          onClick={() => setIsPlaying((p) => !p)}
-        >
+        <button style={styles.btn} onClick={() => setIsPlaying((p) => !p)}>
           {isPlaying ? 'Pause' : 'Play'}
         </button>
         <input

@@ -35,7 +35,12 @@
     "userId": "1234567890"
   },
   "claudeCode": {},
-  "codexCli": {},
+  "codexCli": {
+    "approvalMode": "on-failure",
+    "sandboxMode": "workspace-write",
+    "reasoningEffort": "high",
+    "verbose": false
+  },
   "grokCli": {
     "timeout": 120000,
     "workingDirectory": null,

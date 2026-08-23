@@ -85,7 +85,11 @@ export async function registerCompanionRoutes(
     ? new ClaudeAdapter()
     : new OllamaAdapter();
 
-  const engine = new CompanionEngine(defaultAdapter, companionConfig);
+  const engine = new CompanionEngine(
+    defaultAdapter,
+    companionConfig,
+    projectRoot,
+  );
 
   // Reload personality when companion.yml changes
   configEngine.on("config:changed", async ({ filePath }) => {
@@ -198,7 +202,11 @@ export async function registerCompanionRoutes(
 
       try {
         const result = await generateCardsFromText(engine, text);
-        return { cards: result.cards };
+        return {
+          cards: result.cards,
+          degraded: result.degraded,
+          degradationReason: result.degradationReason,
+        };
       } catch (err: unknown) {
         const errorMsg =
           err instanceof Error ? err.message : "Unknown error";

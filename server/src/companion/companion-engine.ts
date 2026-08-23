@@ -3,12 +3,16 @@
  *
  * Responsibilities:
  *  - Assembles system prompts from companion.yml + workspace context
+ *  - Reads .mira/memory.yml and injects it into the system prompt
  *  - Manages conversation sessions
  *  - Delegates to the active LLM adapter
  *  - Parses action suggestions from assistant responses
  */
 
 import { randomUUID } from "node:crypto";
+import { readFile } from "node:fs/promises";
+import path from "node:path";
+import yaml from "js-yaml";
 import type { CompanionConfig } from "../config/types.js";
 import type {
   LLMAdapter,
@@ -23,13 +27,26 @@ export class CompanionEngine {
   private adapter: LLMAdapter;
   private companionConfig: CompanionConfig;
   private sessions: Map<string, CompanionSession> = new Map();
+  private readonly projectRoot: string | undefined;
 
   /** Maximum messages to keep per session (system + history) */
   private readonly maxHistory = 50;
 
-  constructor(adapter: LLMAdapter, companionConfig: CompanionConfig) {
+  /**
+   * @param adapter         - Active LLM adapter
+   * @param companionConfig - Loaded companion.yml config
+   * @param projectRoot     - Optional absolute path to the project root;
+   *                          when provided, `.mira/memory.yml` is read and
+   *                          injected into the system prompt.
+   */
+  constructor(
+    adapter: LLMAdapter,
+    companionConfig: CompanionConfig,
+    projectRoot?: string,
+  ) {
     this.adapter = adapter;
     this.companionConfig = companionConfig;
+    this.projectRoot = projectRoot;
   }
 
   // -------------------------------------------------------------------------
@@ -83,7 +100,7 @@ export class CompanionEngine {
     session.lastActivity = Date.now();
 
     // Build the messages array: system prompt + history + new user message
-    const systemPrompt = this.buildSystemPrompt(context);
+    const systemPrompt = await this.buildSystemPrompt(context);
     const systemMsg: CompanionMessage = {
       role: "system",
       content: systemPrompt,
@@ -120,7 +137,16 @@ export class CompanionEngine {
   // System prompt assembly
   // -------------------------------------------------------------------------
 
-  private buildSystemPrompt(context: CompanionContext): string {
+  /**
+   * Build the system prompt for the companion.
+   * Reads `.mira/memory.yml` from `projectRoot` (if set) and appends
+   * its contents as a "Project memory" section so the LLM is aware of
+   * project-local context on every request.
+   *
+   * Public so that tests and external integrations can inspect the assembled
+   * prompt without issuing a full chat request.
+   */
+  async buildSystemPrompt(context: CompanionContext): Promise<string> {
     const cfg = this.companionConfig;
     const lines: string[] = [];
 
@@ -167,6 +193,12 @@ export class CompanionEngine {
       );
     }
 
+    // Project memory from .mira/memory.yml
+    const memory = await this.loadProjectMemory();
+    if (memory) {
+      lines.push(`\nProject memory:\n${memory}`);
+    }
+
     // Action suggestion format
     lines.push(`
 When you want to suggest an action the user can take, embed it in your response using this format:
@@ -176,6 +208,36 @@ When you want to suggest an action the user can take, embed it in your response 
 Only suggest actions when genuinely helpful. Do not force actions into every response.`);
 
     return lines.join("\n");
+  }
+
+  // -------------------------------------------------------------------------
+  // Project memory
+  // -------------------------------------------------------------------------
+
+  /**
+   * Read and parse `.mira/memory.yml` from `projectRoot`.
+   * Returns the YAML-dumped string representation so it is human-readable
+   * inside the system prompt. Returns `null` when:
+   *  - `projectRoot` is not set
+   *  - the file does not exist (ENOENT)
+   *  - the file contains invalid YAML or a non-object value
+   *  - any other I/O error
+   */
+  private async loadProjectMemory(): Promise<string | null> {
+    if (!this.projectRoot) return null;
+
+    try {
+      const raw = await readFile(
+        path.join(this.projectRoot, ".mira", "memory.yml"),
+        "utf8",
+      );
+      const parsed = yaml.load(raw);
+      if (!parsed || typeof parsed !== "object") return null;
+      return yaml.dump(parsed).trim();
+    } catch {
+      // Silently skip missing file or any other read/parse error
+      return null;
+    }
   }
 
   // -------------------------------------------------------------------------

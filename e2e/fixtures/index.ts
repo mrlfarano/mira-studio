@@ -14,7 +14,7 @@ type MiraFixtures = {
 }
 
 export const test = base.extend<MiraFixtures>({
-  appPage: async ({ page }, use) => {
+  appPage: async ({ page }, finish) => {
     // Return empty workspace layout so pre-existing .mira/ panels don't bleed into tests
     await page.route('**/api/config/workspaces/**', async (route) => {
       if (route.request().method() === 'GET') {
@@ -31,10 +31,10 @@ export const test = base.extend<MiraFixtures>({
     })
     await page.goto('/')
     await page.waitForSelector('[data-testid="layout-engine"]', { timeout: 10000 })
-    await use()
+    await finish()
   },
 
-  appWithPanels: async ({ page }, use) => {
+  appWithPanels: async ({ page }, finish) => {
     // Return empty workspace layout so pre-existing .mira/ panels don't bleed into tests
     await page.route('**/api/config/workspaces/**', async (route) => {
       if (route.request().method() === 'GET') {
@@ -57,7 +57,7 @@ export const test = base.extend<MiraFixtures>({
     await page.fill('[data-testid="command-palette-input"]', 'kanban')
     await page.keyboard.press('Enter')
     await page.waitForSelector('[data-testid="kanban-board"]', { timeout: 8000 })
-    await use()
+    await finish()
   },
 })
 

@@ -198,7 +198,7 @@ export class PairSessionManager {
         this.sendTo(session.guest.ws, { type: 'session-ended' })
       }
       this.sessions.delete(sessionId)
-    } else if (session.guest?.ws === ws) {
+    } else if (session.guest && session.guest.ws === ws) {
       // Guest left — notify owner
       const guestName = session.guest.name
       session.guest = null

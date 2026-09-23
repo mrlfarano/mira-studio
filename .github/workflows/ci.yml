@@ -48,6 +48,19 @@ jobs:
       - run: npm ci --legacy-peer-deps
       - run: npm run test
 
+  typecheck-server:
+    name: Server Typecheck
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+      - run: npm ci --legacy-peer-deps
+      - run: npm --prefix server install
+      - run: npm run typecheck:server
+
   test-server:
     name: Server Tests
     needs: build
@@ -61,3 +74,18 @@ jobs:
       - run: npm ci --legacy-peer-deps
       - run: npm --prefix server install
       - run: npm run test:server
+
+  test-e2e:
+    name: E2E Tests
+    needs: build
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+      - run: npm ci --legacy-peer-deps
+      - run: npm --prefix server install
+      - run: npx playwright install --with-deps chromium
+      - run: npm run test:e2e

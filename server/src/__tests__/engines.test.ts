@@ -259,14 +259,14 @@ describe('SIAgent', () => {
     it('throws when already running', async () => {
       // Access the private _running field to simulate a running state
        
-      ;(siAgent as Record<string, unknown>)['_running'] = true
+      ;(siAgent as unknown as Record<string, unknown>)['_running'] = true
 
       await expect(siAgent.runCycle('some-hypothesis')).rejects.toThrow(
         'SI Agent is already running a build cycle',
       )
 
       // Reset
-      ;(siAgent as Record<string, unknown>)['_running'] = false
+      ;(siAgent as unknown as Record<string, unknown>)['_running'] = false
     })
 
     it('throws when hypothesis is not found', async () => {

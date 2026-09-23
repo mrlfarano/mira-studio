@@ -30,3 +30,6 @@ dist/
 # Mira Studio personal/secret files (auto-managed)
 .mira/memory.yml
 .mira/.personal/
+
+# graft's local graph cache — regenerable, not committed (run `graft build`).
+/graft/
